@@ -1,0 +1,327 @@
+<?php
+require_once 'php/config.php';
+if (!isAuthenticated()) {
+    header('Location: index.php');
+    exit;
+}
+if (!isAdmin()) {
+    header('Location: main.php');
+    exit;
+}
+?>
+<!doctype html><html lang="es" data-theme="light"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#008B8B">
+<title>Administración — Med Tools Hub</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  document.documentElement.classList.add('preload');
+  window.addEventListener('DOMContentLoaded', function(){
+    document.body.classList.add('loaded');
+    document.documentElement.classList.remove('preload');
+  });
+</script>
+</head><body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><span class="logo-full">Med Tools Hub</span><span class="logo-short">MTH</span></div>
+      <nav>
+        <a href="main.php"><span class="icon">🏠</span><span>Principal</span></a>
+        <a href="vademecum.php"><span class="icon">💊</span><span>Vademecum</span></a>
+        <a href="herramientas.php"><span class="icon">🔧</span><span>Herramientas</span></a>
+        <a href="sugerencias.php"><span class="icon">💬</span><span>Sugerencias</span><span id="sugerenciasBadge" class="sidebar-notification-badge" style="display:none;">0</span></a>
+        <a href="configuracion.php"><span class="icon">⚙️</span><span>Configuración</span></a>
+        <a href="admin.php" class="active" id="adminNavLink"><span class="icon">🛠️</span><span>Administración</span><span id="adminBadge" class="sidebar-notification-badge" style="display:none;">0</span></a>
+      </nav>
+    </aside>
+    <div class="content">
+      <header class="header">
+        <button id="btnToggleSidebar" type="button"></button>
+        <h2>Administración</h2>
+        <div id="colombiaClock" style="font-size:13px;color:var(--muted);margin:0 auto 0 12px;white-space:nowrap;"></div>
+        <div class="user-info">
+          <img id="avatarTop" alt="">
+          <span id="mainUserInfo" class="text-muted"></span>
+          <button class="btn danger sm" type="button" onclick="logout()">Salir</button>
+        </div>
+      </header>
+      <main>
+        <section class="card glass accordion">
+          <div class="toolbar accordion-header" style="display:flex;align-items:center;gap:10px;cursor:pointer;" data-toggle="usuarios">
+            <h3 style="margin:0;">Usuarios <span id="usuariosPendientesCounter" class="chip" style="display:none;margin-left:8px;background:#ff8c00;color:#fff;">0</span></h3><div class="grow"></div><span class="accordion-icon">▼</span>
+          </div>
+          <div class="accordion-content" id="usuarios" style="display:none;margin-top:10px;">
+            <div class="table-wrap">
+              <table id="adminUsersTable">
+                <thead><tr>
+                  <th>Usuario</th><th>Nombre</th><th>Categoría</th><th>Correo</th><th>Teléfono</th><th>Institución</th><th>Rol</th><th>Estado</th><th style="width:320px">Acciones</th>
+                </tr></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <div style="display:flex;gap:20px;">
+          <div style="flex:1;">
+            <section class="card glass accordion">
+              <div class="toolbar accordion-header" style="display:flex;align-items:center;gap:10px;cursor:pointer;" data-toggle="anuncios">
+                <h3 style="margin:0;">Anuncios</h3><div class="grow"></div>
+                <button id="btnNuevoAnuncio" class="btn sm" type="button" onclick="event.stopPropagation()">+ Nuevo anuncio</button>
+                <span class="accordion-icon">▼</span>
+              </div>
+              <div class="accordion-content" id="anuncios" style="display:none;margin-top:10px;">
+                <div class="table-wrap">
+                  <table id="adminAnunciosTable"><thead>
+                    <tr><th>Imagen</th><th>Título</th><th>Fecha</th><th>Contenido</th><th style="width:180px;">Acciones</th></tr>
+                  </thead><tbody></tbody></table>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div style="flex:1;">
+            <section class="card glass accordion">
+              <div class="toolbar accordion-header" style="display:flex;align-items:center;gap:10px;cursor:pointer;" data-toggle="guias">
+                <h3 style="margin:0;">Guías</h3><div class="grow"></div>
+                <button id="btnNuevaGuia" class="btn sm" type="button" onclick="event.stopPropagation()">+ Nueva guía</button>
+                <span class="accordion-icon">▼</span>
+              </div>
+              <div class="accordion-content" id="guias" style="display:none;margin-top:10px;">
+                <div class="table-wrap">
+                  <table id="adminGuiasTable"><thead>
+                    <tr><th>Título</th><th>Fecha</th><th>Contenido</th><th>Enlace</th><th style="width:180px;">Acciones</th></tr>
+                  </thead><tbody></tbody></table>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <section class="card glass accordion">
+          <div class="toolbar accordion-header" style="display:flex;align-items:center;gap:10px;cursor:pointer;" data-toggle="medicamentos">
+            <h3 style="margin:0;">Vademecum</h3><div class="grow"></div>
+            <button id="btnNuevoMedicamento" class="btn sm" type="button" onclick="event.stopPropagation()">+ Nuevo medicamento</button>
+            <span class="accordion-icon">▼</span>
+          </div>
+          <div class="accordion-content" id="medicamentos" style="display:none;margin-top:10px;">
+            <div class="table-wrap">
+              <table id="adminMedicamentosTable"><thead>
+                <tr><th>Fármaco</th><th>Grupo</th><th>Dilución</th><th>Comentarios</th><th style="width:180px;">Acciones</th></tr>
+              </thead><tbody></tbody></table>
+            </div>
+          </div>
+        </section>
+
+        <section class="card glass accordion">
+          <div class="toolbar accordion-header" style="display:flex;align-items:center;gap:10px;cursor:pointer;" data-toggle="infusiones">
+            <h3 style="margin:0;">Medicamentos de Infusiones</h3><div class="grow"></div>
+            <button id="btnNuevaInfusion" class="btn sm" type="button" onclick="event.stopPropagation()">+ Nuevo medicamento</button>
+            <span class="accordion-icon">▼</span>
+          </div>
+          <div class="accordion-content" id="infusiones" style="display:none;margin-top:10px;">
+            <div class="table-wrap">
+              <table id="adminInfusionesTable"><thead>
+                <tr><th>Medicamento</th><th>Presentación</th><th>Dosis</th><th>Diluciones</th><th style="width:180px;">Acciones</th></tr>
+              </thead><tbody></tbody></table>
+            </div>
+          </div>
+        </section>
+
+        <section class="card glass accordion">
+          <div class="toolbar accordion-header" style="display:flex;align-items:center;gap:10px;cursor:pointer;" data-toggle="sugerencias">
+            <h3 style="margin:0;">Sugerencias <span id="sugerenciasCounter" class="chip" style="display:none;margin-left:8px;background:#ff8c00;color:#fff;">0</span></h3><div class="grow"></div>
+            <span class="accordion-icon">▼</span>
+          </div>
+          <div class="accordion-content" id="sugerencias" style="display:none;margin-top:10px;">
+            <div class="table-wrap">
+              <table id="adminSugerenciasTable"><thead>
+                <tr><th>Usuario</th><th>Fecha</th><th>Mensaje</th><th>Respuesta</th><th style="width:180px;">Acciones</th></tr>
+              </thead><tbody></tbody></table>
+            </div>
+          </div>
+        </section>
+
+        <section class="card glass accordion">
+          <div class="toolbar accordion-header" style="display:flex;align-items:center;gap:10px;cursor:pointer;" data-toggle="mantenimiento">
+            <h3 style="margin:0;">⚙️ Modo Mantenimiento</h3><div class="grow"></div>
+            <span id="mantenimientoStatus" class="chip" style="display:inline-block;background:#10b981;color:#fff;">INACTIVO</span>
+            <span class="accordion-icon">▼</span>
+          </div>
+          <div class="accordion-content" id="mantenimiento" style="display:none;margin-top:10px;">
+            <div style="padding:16px;background:rgba(255,193,7,0.1);border-left:4px solid #ffc107;border-radius:6px;margin-bottom:16px;">
+              <p style="margin:0;"><strong>⚠️ Importante:</strong> Cuando el modo mantenimiento esté activo, los usuarios verán una página de mantenimiento después de iniciar sesión. Solo los administradores podrán acceder al sistema completo.</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <label class="switch" style="margin:0;">
+                <input id="toggleMantenimiento" type="checkbox">
+                <span class="slider"></span>
+                <span>Activar modo mantenimiento</span>
+              </label>
+            </div>
+            <div id="mantenimientoMensajeSection" style="margin-top:16px;display:none;">
+              <div class="field">
+                <label>Mensaje personalizado para los usuarios</label>
+                <textarea id="mantenimientoMensaje" rows="3" placeholder="Ej: Estamos realizando mejoras en el sistema. Estaremos de vuelta pronto.">Estamos realizando mejoras en el sistema para brindarte una mejor experiencia. Por favor, vuelve en unos minutos.</textarea>
+              </div>
+              <button class="btn primary" onclick="guardarMantenimiento()">Guardar mensaje</button>
+            </div>
+          </div>
+        </section>
+        <footer class="app-footer">
+          <h4>Aviso Legal</h4>
+          <p>Las herramientas de Med Tools Hub son de apoyo clínico y no sustituyen el criterio profesional.</p>
+          <p>El uso y aplicación de los resultados son responsabilidad exclusiva de cada profesional de la salud.</p>
+          <p class="trademark">NBR® 2025 | Med Tools Hub</p>
+          <p class="contact">administrador@medtoolshub.com</p>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL USUARIO -->
+  <div class="modal-backdrop" id="modalUser">
+    <div class="modal glass">
+      <header><h3 style="margin:0;">Editar usuario</h3><button class="btn secondary sm" type="button" data-close-user>✕</button></header>
+      <form id="userForm">
+        <div class="grid">
+          <div class="field"><label>Usuario</label><input id="u_username" type="text" disabled></div>
+          <div class="field"><label>Nombre</label><input id="u_name" type="text"></div>
+          <div class="field"><label>Categoría</label>
+            <select id="u_cat"><option>Estudiante</option><option>Interno</option><option>Médico General</option><option>Residente</option><option>Pediatra</option></select>
+          </div>
+          <div class="field"><label>Correo</label><input id="u_email" type="email"></div>
+          <div class="field"><label>Teléfono</label><input id="u_phone" type="text"></div>
+          <div class="field"><label>Institución</label><input id="u_inst" type="text"></div>
+          <div class="field"><label>Rol</label><select id="u_role"><option value="user">USER</option><option value="admin">ADMIN</option></select></div>
+          <div class="field"><label>Estado</label><select id="u_status"><option value="pendiente">PENDIENTE</option><option value="aprobado">APROBADO</option><option value="rechazado">RECHAZADO</option><option value="suspendido">SUSPENDIDO</option></select></div>
+        </div>
+        <div class="auth-actions" style="margin-top:14px;"><button class="btn grow" type="submit">Guardar</button><button class="btn secondary" type="button" data-close-user>Cancelar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL ANUNCIO -->
+  <div class="modal-backdrop" id="modalAnuncio">
+    <div class="modal glass">
+      <header><h3 style="margin:0;">Editar anuncio</h3><button class="btn secondary sm" type="button" data-close-anuncio>✕</button></header>
+      <form id="anuncioForm"><input type="hidden" id="anuncioId">
+        <div class="grid" style="grid-template-columns:1fr 200px;">
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="field"><label for="anuncioTitulo">Título</label><input id="anuncioTitulo" type="text"></div>
+            <div class="field"><label for="anuncioFecha">Fecha</label><input id="anuncioFecha" type="date"></div>
+            <div class="field" style="flex:1;display:flex;flex-direction:column;"><label for="anuncioTexto">Contenido</label><textarea id="anuncioTexto" style="flex:1;min-height:200px;"></textarea></div>
+            <div class="field"><label class="switch"><input id="anuncioGlobal" type="checkbox" checked><span class="slider"></span><span>Visible para todos los usuarios</span></label></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="field"><label>Imagen</label><img id="anuncioPreview" class="thumb" alt="" style="width:100%;height:120px;border-radius:12px;border:1px solid var(--border);object-fit:cover;background:linear-gradient(135deg,var(--g1),var(--g2));display:none;"></div>
+            <button class="btn sm" type="button" onclick="document.getElementById('anuncioImg').click()">Añadir imagen</button>
+            <button class="btn secondary sm" type="button" id="btnAnuncioQuitarImg">Quitar imagen</button>
+            <input id="anuncioImg" type="file" accept="image/*" style="display:none;">
+          </div>
+        </div>
+        <div class="auth-actions" style="margin-top:14px;"><button class="btn grow" type="submit">Guardar</button><button class="btn secondary" type="button" data-close-anuncio>Cancelar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL GUÍA -->
+  <div class="modal-backdrop" id="modalGuia">
+    <div class="modal glass">
+      <header><h3 style="margin:0;">Editar guía</h3><button class="btn secondary sm" type="button" data-close-guia>✕</button></header>
+      <form id="guiaForm"><input type="hidden" id="guiaId">
+        <div class="grid">
+          <div class="field"><label for="guiaTitulo">Título</label><input id="guiaTitulo" type="text"></div>
+          <div class="field"><label for="guiaFecha">Fecha</label><input id="guiaFecha" type="date"></div>
+          <div class="field" style="grid-column:1 / -1"><label for="guiaTexto">Contenido</label><textarea id="guiaTexto"></textarea></div>
+          <div class="field" style="grid-column:1 / -1"><label for="guiaURL">Enlace (PDF o externo)</label><input id="guiaURL" type="url" placeholder="https://…"></div>
+          <div class="field" style="grid-column:1 / -1"><label class="switch"><input id="guiaGlobal" type="checkbox" checked><span class="slider"></span><span>Visible para todos los usuarios</span></label></div>
+        </div>
+        <div class="auth-actions" style="margin-top:14px;"><button class="btn grow" type="submit">Guardar</button><button class="btn secondary" type="button" data-close-guia>Cancelar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL MEDICAMENTO -->
+  <div class="modal-backdrop" id="modalMedicamento">
+    <div class="modal glass">
+      <header><h3 style="margin:0;">Editar medicamento</h3><button class="btn secondary sm" type="button" data-close-med>✕</button></header>
+      <form id="medicamentoForm"><input type="hidden" id="medId">
+        <div class="grid">
+          <div class="field"><label for="medNombre">Fármaco</label><input id="medNombre" type="text" required></div>
+          <div class="field"><label for="medGrupo">Grupo farmacológico</label><input id="medGrupo" type="text" required></div>
+          <div class="field" style="grid-column:1 / -1"><label for="medDilucion">Dilución sugerida</label><textarea id="medDilucion" rows="2" required></textarea></div>
+          <div class="field" style="grid-column:1 / -1"><label for="medComentarios">Comentarios y dosificación</label><textarea id="medComentarios" rows="3" required></textarea></div>
+        </div>
+        <div class="auth-actions" style="margin-top:14px;"><button class="btn grow" type="submit">Guardar</button><button class="btn secondary" type="button" data-close-med>Cancelar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalCropAnuncio">
+    <div class="modal glass" style="max-width:700px;">
+      <header><h3 style="margin:0;">Recortar imagen del anuncio</h3><button class="btn secondary sm" type="button" id="closeCropAnuncio">✕</button></header>
+      <div style="position:relative;width:600px;height:400px;overflow:hidden;margin:0 auto;background:#000;border-radius:12px;">
+        <canvas id="cropCanvasAnuncio" style="position:absolute;top:0;left:0;cursor:move;"></canvas>
+      </div>
+      <div style="margin-top:14px;">
+        <label style="display:block;margin-bottom:8px;font-size:14px;">Zoom: <input type="range" id="zoomSliderAnuncio" min="50" max="300" value="50" style="width:200px;"></label>
+      </div>
+      <div class="auth-actions" style="margin-top:14px;">
+        <button class="btn grow" type="button" id="applyCropAnuncio">Aplicar recorte</button>
+        <button class="btn secondary" type="button" id="cancelCropAnuncio">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SUGERENCIA -->
+  <div class="modal-backdrop" id="modalSugerencia">
+    <div class="modal glass">
+      <header><h3 style="margin:0;">Responder sugerencia</h3><button class="btn secondary sm" type="button" data-close-sugerencia>✕</button></header>
+      <form id="sugerenciaAdminForm">
+        <input type="hidden" id="sug_id">
+        <div class="grid">
+          <div class="field" style="grid-column:1 / -1;"><label>Usuario</label><input id="sug_username" type="text" disabled></div>
+          <div class="field" style="grid-column:1 / -1;"><label>Mensaje</label><textarea id="sug_mensaje" rows="3" disabled></textarea></div>
+          <div class="field" style="grid-column:1 / -1;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <label style="margin:0;">Respuesta del administrador</label>
+              <button type="button" class="btn sm" onclick="usarRespuestaPredeterminada()" style="font-size:12px;">Usar respuesta predeterminada</button>
+            </div>
+            <textarea id="sug_respuesta" rows="4" placeholder="Escribe tu respuesta..."></textarea>
+          </div>
+        </div>
+        <div class="auth-actions" style="margin-top:14px;"><button class="btn grow" type="submit">Guardar respuesta</button><button class="btn secondary" type="button" data-close-sugerencia>Cancelar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL INFUSION -->
+  <div class="modal-backdrop" id="modalInfusion">
+    <div class="modal glass">
+      <header><h3 style="margin:0;">Editar medicamento de infusión</h3><button class="btn secondary sm" type="button" data-close-infusion>✕</button></header>
+      <form id="infusionForm"><input type="hidden" id="infId">
+        <div class="grid">
+          <div class="field" style="grid-column:1 / -1;"><label for="infNombre">Nombre del medicamento</label><input id="infNombre" type="text" required></div>
+          <div class="field" style="grid-column:1 / -1;"><label for="infPresentacion">Presentación (ej: 500MCG/10ML = 50MCG/ML)</label><input id="infPresentacion" type="text" required></div>
+          <div class="field"><label for="infDosis">Dosis</label><input id="infDosis" type="text" placeholder="1MCG/KG/HORA" required></div>
+          <div class="field"><label for="infUnidad">Unidad</label>
+            <select id="infUnidad" required>
+              <option value="mcg/kg/h">mcg/kg/h</option>
+              <option value="mg/kg/h">mg/kg/h</option>
+              <option value="mcg/kg/min">mcg/kg/min</option>
+              <option value="UI/kg/min">UI/kg/min</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:1 / -1;"><label for="infDiluciones">Diluciones disponibles (separadas por coma)</label><textarea id="infDiluciones" rows="2" placeholder="12CC, 24CC, 50CC, 100CC" required></textarea></div>
+        </div>
+        <div class="auth-actions" style="margin-top:14px;"><button class="btn grow" type="submit">Guardar</button><button class="btn secondary" type="button" data-close-infusion>Cancelar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body></html>

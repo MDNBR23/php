@@ -1,0 +1,46 @@
+<!doctype html><html lang="es" data-theme="light"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#008B8B">
+<title>Registrarse — Med Tools Hub</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  document.documentElement.classList.add('preload');
+  window.addEventListener('DOMContentLoaded', function(){
+    document.body.classList.add('loaded');
+    document.documentElement.classList.remove('preload');
+  });
+</script>
+</head><body>
+  <div class="auth-wrapper">
+    <div class="auth-box glass">
+      <h2 class="auth-title">Med Tools Hub</h2>
+      <form id="registerForm" class="stack" autocomplete="off">
+        <div class="field"><label for="registerUser">Usuario</label><input id="registerUser" type="text" required></div>
+        <div class="field"><label for="registerEmail">Email</label><input id="registerEmail" type="email" required></div>
+        <div class="field"><label for="registerCat">Categoría</label>
+          <select id="registerCat" required>
+            <option value="">Selecciona una opción</option>
+            <option>Estudiante</option><option>Interno</option><option>Médico General</option><option>Residente</option><option>Pediatra</option><option>Fisioterapeuta</option>
+          </select>
+        </div>
+        <div class="field"><label for="registerPhone">Número de teléfono</label><input id="registerPhone" type="tel" required></div>
+        <div class="field"><label for="registerInst">Institución</label><input id="registerInst" type="text" required></div>
+        <div class="field"><label for="registerPass">Contraseña</label><input id="registerPass" type="password" required></div>
+        <div class="field"><label for="registerPassConfirm">Confirmar Contraseña</label><input id="registerPassConfirm" type="password" required></div>
+        <div class="auth-actions"><button class="btn grow" type="submit">Enviar registro</button><a class="btn secondary" href="index.php">Ya tengo cuenta</a></div>
+        <p class="text-muted">Tu registro quedará en <strong>pendiente</strong> hasta que un administrador lo apruebe.</p>
+      </form>
+    </div>
+    <footer class="app-footer">
+      <h4>Aviso Legal</h4>
+      <p>Las herramientas de Med Tools Hub son de apoyo clínico y no sustituyen el criterio profesional. El uso y aplicación de los resultados son responsabilidad exclusiva de cada profesional de la salud.</p>
+      <p class="trademark">NBR® 2025 | Med Tools Hub</p>
+      <p class="contact">administrador@medtoolshub.com</p>
+    </footer>
+  </div>
+  <script src="script.js"></script>
+</body></html>

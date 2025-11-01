@@ -1,0 +1,2814 @@
+<?php
+require_once 'php/config.php';
+if (!isAuthenticated()) {
+    header('Location: index.php');
+    exit;
+}
+?>
+<!doctype html><html lang="es" data-theme="light"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#008B8B">
+<title>Herramientas — Med Tools Hub</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.tool-menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+.tool-card {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+}
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 70px rgba(0,0,0,.4);
+}
+.tool-card-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+.tool-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: var(--text);
+}
+.tool-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.tool-section {
+  margin-bottom: 24px;
+}
+.tool-result {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.gsa-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.gsa-input-card {
+  position: relative;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(0,139,139,0.05), rgba(0,128,128,0.05));
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+.gsa-input-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 8px 20px rgba(0,139,139,0.15);
+}
+.gsa-input-card label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.range-indicator {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.interactive-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  background: var(--card);
+}
+.interactive-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,139,139,0.1);
+}
+.input-status {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  min-height: 18px;
+  transition: all 0.2s ease;
+}
+.gsa-result {
+  padding: 20px;
+  background: linear-gradient(135deg, var(--g1), var(--g2));
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.gsa-result h4 {
+  margin: 0 0 12px 0;
+  color: white;
+  font-size: 18px;
+}
+.gsa-result p {
+  margin: 8px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.doc-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.doc-item .doc-name {
+  flex: 1;
+  font-weight: 500;
+}
+.doc-item .doc-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+.text-editor {
+  width: 100%;
+  min-height: 300px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 14px;
+  margin-top: 12px;
+}
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 10px 18px;
+  background: rgba(71,85,105,.85);
+  color: #fff;
+  border-radius: 12px;
+  text-decoration: none !important;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+.back-btn:hover {
+  background: rgba(51,65,85,.95);
+  transform: translateX(-4px);
+  text-decoration: none !important;
+}
+.infusion-calculator {
+  display: grid;
+  gap: 20px;
+}
+.infusion-section {
+  padding: 16px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.infusion-section h4 {
+  margin: 0 0 12px 0;
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 700;
+}
+.infusion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.infusion-result {
+  background: linear-gradient(135deg, var(--g1), var(--g2));
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 12px;
+  transition: all 0.3s ease;
+  animation: fadeInScale 0.4s ease;
+}
+.infusion-result h5 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: white;
+}
+.infusion-result p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+.infusion-result.updating {
+  animation: pulse 0.5s ease;
+}
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+.medication-select {
+  margin-bottom: 16px;
+}
+.infusion-table {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+}
+.infusion-table th,
+.infusion-table td {
+  padding: 8px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+.infusion-table th {
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+  font-size: 13px;
+}
+.infusion-table td {
+  background: var(--bg);
+  font-size: 14px;
+}
+#medicationSelect {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size: 15px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: rgba(255,255,255,.95);
+  color: #1a202c;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+html[data-theme="dark"] #medicationSelect {
+  background: rgba(20,25,42,.85);
+  color: #f7fafc;
+}
+</style>
+<script>
+  document.documentElement.classList.add('preload');
+  window.addEventListener('DOMContentLoaded', function(){
+    document.body.classList.add('loaded');
+    document.documentElement.classList.remove('preload');
+  });
+</script>
+</head><body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo"><span class="logo-full">Med Tools Hub</span><span class="logo-short">MTH</span></div>
+      <nav>
+        <a href="main.php"><span class="icon">🏠</span><span>Principal</span></a>
+        <a href="vademecum.php"><span class="icon">💊</span><span>Vademecum</span></a>
+        <a href="herramientas.php" class="active"><span class="icon">🔧</span><span>Herramientas</span></a>
+        <a href="sugerencias.php"><span class="icon">💬</span><span>Sugerencias</span><span id="sugerenciasBadge" class="sidebar-notification-badge" style="display:none;">0</span></a>
+        <a href="configuracion.php"><span class="icon">⚙️</span><span>Configuración</span></a>
+        <a href="admin.php" id="adminNavLink" style="display:none;"><span class="icon">🛠️</span><span>Administración</span><span id="adminBadge" class="sidebar-notification-badge" style="display:none;">0</span></a>
+      </nav>
+    </aside>
+    <div class="content">
+      <header class="header">
+        <button id="btnToggleSidebar" type="button"></button>
+        <h2>Herramientas</h2>
+        <div id="colombiaClock" style="font-size:13px;color:var(--muted);margin:0 auto 0 12px;white-space:nowrap;"></div>
+        <div class="user-info">
+          <img id="avatarTop" alt="">
+          <span id="mainUserInfo" class="text-muted"></span>
+          <button class="btn danger sm" type="button" onclick="logout()">Salir</button>
+        </div>
+      </header>
+      <main>
+        
+        <div id="toolMenu" class="tool-menu">
+          <div class="card glass tool-card" onclick="showTool('corrector')">
+            <span class="tool-card-icon">📝</span>
+            <h3>Corrector de Texto</h3>
+            <p>Herramientas de formato y corrección de texto</p>
+          </div>
+          
+          <div class="card glass tool-card" onclick="showTool('gases')">
+            <span class="tool-card-icon">🫁</span>
+            <h3>Ventilación</h3>
+            <p>Interpreta gases arteriales y calcula índice de oxigenación</p>
+          </div>
+          
+          <div class="card glass tool-card" onclick="showTool('infusiones')">
+            <span class="tool-card-icon">💉</span>
+            <h3>Calculadora</h3>
+            <p>Calculadora de sedoanalgesia e infusiones</p>
+          </div>
+          
+          <div class="card glass tool-card" onclick="showTool('plantillas')">
+            <span class="tool-card-icon">📋</span>
+            <h3>Plantillas</h3>
+            <p>Gestiona plantillas de evolución por patología</p>
+          </div>
+          
+          <div class="card glass tool-card" onclick="showTool('turnos')">
+            <span class="tool-card-icon">📅</span>
+            <h3>Turnos Médicos</h3>
+            <p>Organiza turnos con horarios, valores y recordatorios</p>
+          </div>
+          
+          <div class="card glass tool-card" onclick="showTool('ia')">
+            <span class="tool-card-icon">🤖</span>
+            <h3>IA Médica</h3>
+            <p>Consulta evidencia médica con IA especializada</p>
+          </div>
+          
+          <div class="card glass tool-card" onclick="showTool('interacciones')">
+            <span class="tool-card-icon">⚠️</span>
+            <h3>Interacciones Medicamentosas</h3>
+            <p>Verifica posibles interacciones entre medicamentos</p>
+          </div>
+        </div>
+
+        <div id="correctorTool" style="display:none;">
+          <a href="javascript:void(0)" class="back-btn" onclick="showMenu()">
+            <span>←</span>
+            <span>Volver al menú</span>
+          </a>
+          
+          <section class="card glass tool-section">
+            <h3>Corrector de Texto</h3>
+            <p class="text-muted">Herramientas de formato y corrección de texto.</p>
+            <textarea id="textInput" class="text-editor" placeholder="Pega aquí el texto a procesar..." oninput="actualizarContadores()"></textarea>
+            
+            <div style="margin: 12px 0; padding: 12px; background: var(--bg); border-radius: 8px; display: flex; gap: 16px; flex-wrap: wrap;">
+              <span><strong>Caracteres:</strong> <span id="charCounter">0</span></span>
+              <span><strong>Palabras:</strong> <span id="wordCounter">0</span></span>
+              <span><strong>Líneas:</strong> <span id="lineCounter">0</span></span>
+            </div>
+            
+            <div style="margin-top: 12px;">
+              <h4 style="margin: 0 0 8px 0; font-size: 15px;">Operaciones de texto:</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px;">
+                <button class="btn sm" onclick="aplicarOperacion('espacios')">Corregir Espacios</button>
+                <button class="btn sm" onclick="aplicarOperacion('mayusculas')">TODO MAYÚSCULAS</button>
+                <button class="btn sm" onclick="aplicarOperacion('minusculas')">todo minúsculas</button>
+                <button class="btn sm" onclick="aplicarOperacion('capitalizar')">Capitalizar Palabras</button>
+                <button class="btn sm" onclick="aplicarOperacion('oracion')">Capitalizar oraciones</button>
+                <button class="btn sm" onclick="aplicarOperacion('invertir')">Invertir Texto</button>
+                <button class="btn sm" onclick="aplicarOperacion('eliminarSaltos')">Eliminar Saltos de Línea</button>
+                <button class="btn sm" onclick="aplicarOperacion('duplicar')">Eliminar Líneas Duplicadas</button>
+              </div>
+            </div>
+            
+            <div style="margin-top: 12px; display: flex; gap: 8px;">
+              <button class="btn" onclick="limpiarTexto()">🗑️ Limpiar</button>
+              <button class="btn success" onclick="copiarTexto()">📋 Copiar Texto</button>
+            </div>
+          </section>
+        </div>
+
+        <div id="gasesTool" style="display:none;">
+          <a href="javascript:void(0)" class="back-btn" onclick="showMenu()">
+            <span>←</span>
+            <span>Volver al menú</span>
+          </a>
+          
+          <section class="card glass tool-section">
+            <h3>🫁 Ventilación</h3>
+            <p class="text-muted">Interpreta resultados de gasometría arterial y calcula el índice de oxigenación.</p>
+            <div class="gsa-grid">
+              <div class="gsa-input-card">
+                <label>pH <small class="range-indicator">(7.35-7.45)</small></label>
+                <input type="number" id="gsaPH" step="0.01" placeholder="7.40" class="interactive-input">
+                <div class="input-status" id="statusPH"></div>
+              </div>
+              <div class="gsa-input-card">
+                <label>PaCO₂ <small class="range-indicator">(35-45 mmHg)</small></label>
+                <input type="number" id="gsaPaCO2" step="0.1" placeholder="40" class="interactive-input">
+                <div class="input-status" id="statusPaCO2"></div>
+              </div>
+              <div class="gsa-input-card">
+                <label>PaO₂ <small class="range-indicator">(80-95 mmHg)</small></label>
+                <input type="number" id="gsaPaO2" step="0.1" placeholder="90" class="interactive-input">
+                <div class="input-status" id="statusPaO2"></div>
+              </div>
+              <div class="gsa-input-card">
+                <label>HCO₃ <small class="range-indicator">(22-26 mEq/L)</small></label>
+                <input type="number" id="gsaHCO3" step="0.1" placeholder="24" class="interactive-input">
+                <div class="input-status" id="statusHCO3"></div>
+              </div>
+            </div>
+            <div style="margin-top: 12px; display: flex; gap: 8px;">
+              <button class="btn primary" onclick="interpretarGSA()">🔍 Interpretar Resultado</button>
+              <button class="btn" onclick="limpiarGSA()">🗑️ Limpiar</button>
+            </div>
+            <div id="gsaResult" style="display:none; margin-top: 16px;"></div>
+            
+            <hr style="margin: 24px 0; border: none; border-top: 2px solid var(--border);">
+            
+            <h4 style="margin: 0 0 12px 0; color: var(--primary);">📊 Índice de Oxigenación (IO)</h4>
+            <p class="text-muted" style="margin-bottom: 16px;">Calcula el índice de oxigenación usando la fórmula: IO = (FiO₂ × MAP) / PaO₂</p>
+            
+            <div class="gsa-grid">
+              <div class="gsa-input-card">
+                <label>FiO₂ <small class="range-indicator">(%)</small></label>
+                <input type="number" id="ioFiO2" step="1" placeholder="21-100" min="21" max="100" class="interactive-input">
+                <div class="input-status" id="statusFiO2"></div>
+              </div>
+              <div class="gsa-input-card">
+                <label>MAP <small class="range-indicator">(cmH₂O)</small></label>
+                <input type="number" id="ioMAP" step="0.1" placeholder="5-20" class="interactive-input">
+                <div class="input-status" id="statusMAP"></div>
+              </div>
+              <div class="gsa-input-card">
+                <label>PaO₂ <small class="range-indicator">(mmHg)</small></label>
+                <input type="number" id="ioPaO2" step="0.1" placeholder="80-95" class="interactive-input">
+                <div class="input-status" id="statusIOPaO2"></div>
+              </div>
+            </div>
+            
+            <div style="margin-top: 12px; display: flex; gap: 8px;">
+              <button class="btn primary" onclick="calcularIO()">🧮 Calcular Índice</button>
+              <button class="btn" onclick="limpiarIO()">🗑️ Limpiar</button>
+            </div>
+            <div id="ioResult" style="display:none; margin-top: 16px;"></div>
+          </section>
+        </div>
+
+        <div id="infusionesTool" style="display:none;">
+          <a href="javascript:void(0)" class="back-btn" onclick="showMenu()">
+            <span>←</span>
+            <span>Volver al menú</span>
+          </a>
+          
+          <section class="card glass tool-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div>
+                <h3 style="margin:0;">Calculadora de Infusiones</h3>
+                <p class="text-muted" style="margin:4px 0 0 0;">Calcula dosis de sedoanalgesia, vasopresores, inotrópicos</p>
+              </div>
+              <a href="admin.php" id="adminInfusionesLink" class="btn sm" style="display:none;text-decoration:none;">Gestionar medicamentos</a>
+            </div>
+            
+            <div class="infusion-calculator">
+              <div class="medication-select">
+                <label><strong>Seleccionar medicamento:</strong></label>
+                <select id="medicationSelect" onchange="loadMedication()">
+                  <option value="">Seleccionar medicamento</option>
+                </select>
+              </div>
+
+              <div id="medicationInfo" style="display:none;">
+                <div class="infusion-section">
+                  <h4>📋 Información del Medicamento</h4>
+                  <p id="presentacion" style="margin:0;"></p>
+                  <p id="medicationDetails" style="margin:8px 0 0 0; color:var(--muted); font-size:13px;"></p>
+                </div>
+
+                <div class="infusion-section">
+                  <h4>💉 Datos del Paciente y Dosis</h4>
+                  <div class="gsa-grid">
+                    <div class="gsa-input-card">
+                      <label>Peso <small class="range-indicator">(kg)</small></label>
+                      <input type="number" id="peso" step="0.1" placeholder="Ej: 3.5" class="interactive-input">
+                      <div class="input-status" id="statusPeso"></div>
+                    </div>
+                    <div class="gsa-input-card">
+                      <label id="dosisLabel">Dosis</label>
+                      <input type="number" id="dosis" step="0.01" placeholder="Ej: 1" class="interactive-input">
+                      <div class="input-status" id="statusDosis"></div>
+                    </div>
+                  </div>
+                  <div id="dosisCalculada" style="margin-top:12px;"></div>
+                </div>
+
+                <div class="infusion-section">
+                  <h4>💧 Selección de Dilución</h4>
+                  <div id="dilucionOptions" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(100px, 1fr)); gap:8px;"></div>
+                  <div id="dosisInfusion" style="margin-top:12px;"></div>
+                </div>
+
+                <div id="ordenMedica" class="infusion-result" style="display:none;">
+                  <h5>📝 ORDEN MÉDICA</h5>
+                  <div id="ordenMedicaContent"></div>
+                </div>
+
+                <div style="margin-top:16px; display:flex; gap:8px;">
+                  <button class="btn" onclick="clearInfusion()">🗑️ Limpiar</button>
+                  <button class="btn success" onclick="copyInfusionOrder()">📋 Copiar Orden</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div id="turnosTool" style="display:none;">
+          <a href="javascript:void(0)" class="back-btn" onclick="showMenu()">
+            <span>←</span>
+            <span>Volver al menú</span>
+          </a>
+          
+          <section class="card glass tool-section">
+            <h3>Gestión de Turnos Médicos</h3>
+            <p class="text-muted">Organiza tus turnos médicos con calendario interactivo.</p>
+            
+            <div style="display: flex; gap: 8px; margin-top: 16px; margin-bottom: 12px; flex-wrap: wrap;">
+              <button class="btn sm" id="btnVistaCalendario" onclick="mostrarVistaCalendario()" style="background: var(--primary); color: white;">📅 Calendario</button>
+              <button class="btn sm secondary" id="btnVistaNomina" onclick="mostrarVistaNomina()">💰 Nómina</button>
+              <button class="btn sm secondary" id="btnVistaOPS" onclick="mostrarVistaOPS()">📊 OPS</button>
+              <button class="btn sm secondary" id="btnVistaCambios" onclick="mostrarVistaCambios()">🔄 Cambios de Turno</button>
+            </div>
+            
+            <div id="vistaCalendario">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <button class="btn sm" onclick="cambiarMesCalendario(-1)">← Mes Anterior</button>
+                <h4 id="calendarioMesAnio" style="margin: 0; font-size: 18px;"></h4>
+                <button class="btn sm" onclick="cambiarMesCalendario(1)">Mes Siguiente →</button>
+              </div>
+            
+            <div id="calendarioTurnos" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 20px;"></div>
+            
+            <div id="formTurnoContainer" style="display:none; margin-top: 20px; padding: 16px; background: var(--bg); border-radius: 8px; border: 2px solid var(--primary);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h4 style="margin: 0;" id="tituloFormTurno">Agregar Turno</h4>
+                <button class="btn secondary sm" onclick="cerrarFormTurno()">✕</button>
+              </div>
+              
+              <div id="turnosDiaActual" style="display:none; margin-bottom: 16px; padding: 12px; background: rgba(0,139,139,0.08); border-radius: 6px;">
+                <h5 style="margin: 0 0 8px 0; color: var(--primary);">Turnos programados este día:</h5>
+                <div id="listaTurnosDia"></div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
+                <div class="field">
+                  <label>Fecha del Turno</label>
+                  <input type="date" id="turnoFecha">
+                </div>
+                <div class="field">
+                  <label>Hora de Inicio</label>
+                  <input type="time" id="turnoHoraInicio">
+                </div>
+                <div class="field">
+                  <label>Hora de Fin</label>
+                  <input type="time" id="turnoHoraFin">
+                </div>
+                <div class="field">
+                  <label>Valor del Turno ($)</label>
+                  <input type="number" id="turnoValor" step="0.01" placeholder="0.00">
+                </div>
+                <div class="field">
+                  <label>Lugar</label>
+                  <input type="text" id="turnoLugar" placeholder="Hospital, Clínica...">
+                </div>
+                <div class="field">
+                  <label>Tipo de Turno</label>
+                  <select id="turnoTipo">
+                    <option value="guardia">Guardia</option>
+                    <option value="consulta">Consulta</option>
+                    <option value="cirugia">Cirugía</option>
+                    <option value="otro">Otro</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Tipo de Pago</label>
+                  <select id="turnoPaymentType">
+                    <option value="ops">OPS</option>
+                    <option value="nomina">Nómina</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field" style="margin-top: 12px;">
+                <label>Notas</label>
+                <textarea id="turnoNotas" rows="2" placeholder="Notas adicionales..."></textarea>
+              </div>
+              <div style="margin-top: 12px; display: flex; gap: 8px;">
+                <button class="btn primary" onclick="guardarTurno()">Guardar Turno</button>
+                <button class="btn secondary" onclick="cerrarFormTurno()">Cancelar</button>
+              </div>
+            </div>
+            
+              <div style="margin-top: 16px; padding: 16px; background: var(--bg); border-radius: 8px; border-left: 4px solid var(--primary);">
+                <h4 style="margin: 0 0 12px 0; color: var(--primary);">📊 Resumen del Mes Actual</h4>
+                <div id="resumenTurnos" style="font-size: 14px;"></div>
+              </div>
+            </div>
+            
+            <div id="vistaNomina" style="display:none;">
+              <h4 style="margin-bottom: 12px;">💰 Configuración de Nómina</h4>
+              <p class="text-muted" style="margin-bottom: 16px;">Establece tu salario mensual fijo y los días de trabajo recurrentes.</p>
+              
+              <div style="padding: 16px; background: var(--bg); border-radius: 8px; border: 2px solid #10b981; margin-bottom: 20px;">
+                <h5 style="margin: 0 0 12px 0; color: #10b981;">Información de Nómina</h5>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
+                  <div class="field">
+                    <label>Salario Mensual Fijo ($)</label>
+                    <input type="number" id="nominaSalarioFijo" step="0.01" placeholder="0.00">
+                  </div>
+                  <div class="field">
+                    <label>Lugar de Trabajo</label>
+                    <input type="text" id="nominaLugar" placeholder="Hospital, Clínica...">
+                  </div>
+                </div>
+                
+                <div class="field" style="margin-top: 12px;">
+                  <label>Días de Trabajo (selecciona los días que trabajas)</label>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 8px;">
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid var(--border);">
+                      <input type="checkbox" id="nominaDia0" value="0">
+                      <span>Domingo</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid var(--border);">
+                      <input type="checkbox" id="nominaDia1" value="1">
+                      <span>Lunes</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid var(--border);">
+                      <input type="checkbox" id="nominaDia2" value="2">
+                      <span>Martes</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid var(--border);">
+                      <input type="checkbox" id="nominaDia3" value="3">
+                      <span>Miércoles</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid var(--border);">
+                      <input type="checkbox" id="nominaDia4" value="4">
+                      <span>Jueves</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid var(--border);">
+                      <input type="checkbox" id="nominaDia5" value="5">
+                      <span>Viernes</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid var(--border);">
+                      <input type="checkbox" id="nominaDia6" value="6">
+                      <span>Sábado</span>
+                    </label>
+                  </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;">
+                  <div class="field">
+                    <label>Hora de Inicio</label>
+                    <input type="time" id="nominaHoraInicio" value="08:00">
+                  </div>
+                  <div class="field">
+                    <label>Hora de Fin</label>
+                    <input type="time" id="nominaHoraFin" value="17:00">
+                  </div>
+                  <div class="field">
+                    <label>Tipo de Turno</label>
+                    <select id="nominaTipo">
+                      <option value="guardia">Guardia</option>
+                      <option value="consulta" selected>Consulta</option>
+                      <option value="cirugia">Cirugía</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div style="margin-top: 16px; display: flex; gap: 8px;">
+                  <button class="btn success" onclick="generarTurnosNomina()">✓ Aplicar Turnos al Mes Actual</button>
+                  <button class="btn secondary" onclick="limpiarConfigNomina()">🗑️ Limpiar</button>
+                </div>
+              </div>
+              
+              <div style="padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid #10b981;">
+                <h5 style="margin: 0 0 8px 0; color: #10b981;">ℹ️ Cómo funciona</h5>
+                <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+                  <li>Configura tu salario mensual fijo y los días que trabajas regularmente</li>
+                  <li>Al aplicar, se crearán automáticamente todos los turnos del mes actual</li>
+                  <li>Los turnos se marcarán como tipo "Nómina" en el calendario</li>
+                  <li>El valor del turno se calculará automáticamente: Salario Mensual / Días de Trabajo</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div id="vistaOPS" style="display:none;">
+              <h4 style="margin-bottom: 12px;">📊 Gestión de Turnos OPS</h4>
+              <p class="text-muted" style="margin-bottom: 16px;">Crea turnos individuales o genera secuencias automáticas para turnos OPS variables.</p>
+              
+              <div style="padding: 16px; background: var(--bg); border-radius: 8px; border: 2px solid #f59e0b; margin-bottom: 20px;">
+                <h5 style="margin: 0 0 12px 0; color: #f59e0b;">Generar Secuencia Automática</h5>
+                <p style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">Crea múltiples turnos siguiendo un patrón específico.</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                  <div class="field">
+                    <label>Fecha de Inicio</label>
+                    <input type="date" id="opsSecFechaInicio">
+                  </div>
+                  <div class="field">
+                    <label>Número de Turnos</label>
+                    <input type="number" id="opsSecCantidad" min="1" max="31" value="4" placeholder="¿Cuántos turnos?">
+                  </div>
+                  <div class="field">
+                    <label>Frecuencia</label>
+                    <select id="opsSecFrecuencia">
+                      <option value="1">Cada día</option>
+                      <option value="2">Cada 2 días</option>
+                      <option value="3" selected>Cada 3 días</option>
+                      <option value="4">Cada 4 días</option>
+                      <option value="7">Cada semana</option>
+                      <option value="14">Cada 2 semanas</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;">
+                  <div class="field">
+                    <label>Hora de Inicio</label>
+                    <input type="time" id="opsSecHoraInicio" value="07:00">
+                  </div>
+                  <div class="field">
+                    <label>Hora de Fin</label>
+                    <input type="time" id="opsSecHoraFin" value="19:00">
+                  </div>
+                  <div class="field">
+                    <label>Valor por Turno ($)</label>
+                    <input type="number" id="opsSecValor" step="0.01" placeholder="0.00">
+                  </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;">
+                  <div class="field">
+                    <label>Lugar</label>
+                    <input type="text" id="opsSecLugar" placeholder="Hospital, Clínica...">
+                  </div>
+                  <div class="field">
+                    <label>Tipo de Turno</label>
+                    <select id="opsSecTipo">
+                      <option value="guardia" selected>Guardia</option>
+                      <option value="consulta">Consulta</option>
+                      <option value="cirugia">Cirugía</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div style="margin-top: 16px; display: flex; gap: 8px;">
+                  <button class="btn primary" onclick="generarSecuenciaOPS()">🔄 Generar Secuencia</button>
+                  <button class="btn secondary" onclick="limpiarSecuenciaOPS()">🗑️ Limpiar</button>
+                </div>
+              </div>
+              
+              <div style="padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid #f59e0b;">
+                <h5 style="margin: 0 0 8px 0; color: #f59e0b;">ℹ️ Cómo funciona</h5>
+                <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+                  <li>Define una fecha de inicio y cuántos turnos quieres crear</li>
+                  <li>Selecciona la frecuencia (cada cuántos días se repite el turno)</li>
+                  <li>Los turnos se crearán automáticamente con los mismos datos</li>
+                  <li>También puedes agregar turnos individuales haciendo clic en cualquier día del calendario</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div id="vistaCambios" style="display:none;">
+              <h4 style="margin-bottom: 12px;">Registrar Cambio de Turno</h4>
+              <div style="padding: 16px; background: var(--bg); border-radius: 8px; border: 2px solid var(--primary); margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
+                  <div class="field">
+                    <label>Médico con quien cambio</label>
+                    <input type="text" id="cambioMedico" placeholder="Dr. Juan Pérez">
+                  </div>
+                  <div class="field">
+                    <label>Mi turno original (fecha)</label>
+                    <input type="date" id="cambioMiTurno">
+                  </div>
+                  <div class="field">
+                    <label>Turno que asumo (fecha)</label>
+                    <input type="date" id="cambioTurnoAsumido">
+                  </div>
+                  <div class="field">
+                    <label>Tipo de turno</label>
+                    <select id="cambioTipo">
+                      <option value="guardia">Guardia</option>
+                      <option value="consulta">Consulta</option>
+                      <option value="cirugia">Cirugía</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field" style="margin-top: 12px;">
+                  <label>Notas del cambio</label>
+                  <textarea id="cambioNotas" rows="2" placeholder="Motivo del cambio, acuerdos, etc."></textarea>
+                </div>
+                <div style="margin-top: 12px; display: flex; gap: 8px;">
+                  <button class="btn primary" onclick="guardarCambioTurno()">Registrar Cambio</button>
+                  <button class="btn secondary" onclick="limpiarFormCambio()">Limpiar</button>
+                </div>
+              </div>
+              
+              <h4 style="margin-bottom: 12px;">Historial de Cambios</h4>
+              <div id="listaCambios"></div>
+            </div>
+          </section>
+        </div>
+
+        <div id="iaTool" style="display:none;">
+          <a href="javascript:void(0)" class="back-btn" onclick="showMenu()">
+            <span>←</span>
+            <span>Volver al menú</span>
+          </a>
+          
+          <section class="card glass tool-section">
+            <h3>IA Médica - Consulta Evidencia</h3>
+            <p class="text-muted">Busca información médica basada en evidencia científica.</p>
+            
+            <div style="margin-top: 16px;">
+              <div class="field">
+                <label>Pregunta o búsqueda</label>
+                <textarea id="iaQuery" rows="3" placeholder="Ej: ¿Cuál es el tratamiento de primera línea para neumonía adquirida en la comunidad en pediatría?"></textarea>
+              </div>
+              <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center;">
+                <button class="btn primary" onclick="buscarIA()">Buscar</button>
+                <button class="btn" onclick="limpiarIA()">Limpiar</button>
+                <a href="https://www.openevidence.com/" target="_blank" class="btn secondary" style="text-decoration: none;">Ir a Open Evidence</a>
+              </div>
+            </div>
+
+            <div id="iaResult" style="display:none; margin-top: 16px; padding: 16px; background: var(--bg); border-radius: 6px; border-left: 4px solid var(--primary);">
+              <h4 style="margin: 0 0 12px 0; color: var(--primary);">Información</h4>
+              <div id="iaResultContent"></div>
+            </div>
+          </section>
+        </div>
+
+        <div id="interaccionesTool" style="display:none;">
+          <a href="javascript:void(0)" class="back-btn" onclick="showMenu()">
+            <span>←</span>
+            <span>Volver al menú</span>
+          </a>
+          
+          <section class="card glass tool-section">
+            <h3>⚠️ Verificador de Interacciones Medicamentosas</h3>
+            <p class="text-muted">Herramienta para verificar posibles interacciones entre medicamentos. Agrega los medicamentos que el paciente está tomando para revisar.</p>
+            
+            <div style="background: rgba(251,191,36,0.1); border-left: 4px solid #fbbf24; padding: 16px; border-radius: 6px; margin: 16px 0;">
+              <p style="margin: 0; font-size: 14px; color: var(--text);">
+                <strong>⚠️ Importante:</strong> Esta herramienta es de apoyo clínico. Siempre verifica con fuentes actualizadas y tu criterio profesional antes de tomar decisiones terapéuticas.
+              </p>
+            </div>
+            
+            <div style="margin-top: 16px;">
+              <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                <input type="text" id="drugInputInteraction" placeholder="Nombre del medicamento..." style="flex: 1; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;">
+                <button class="btn primary" onclick="agregarMedicamentoInteraction()">Agregar</button>
+              </div>
+              
+              <div id="medicamentosListaInteraction" style="margin-bottom: 16px;"></div>
+              
+              <div style="display: flex; gap: 8px;">
+                <button class="btn success" onclick="verificarInteracciones()">🔍 Verificar Interacciones</button>
+                <button class="btn secondary" onclick="limpiarInteracciones()">🗑️ Limpiar Todo</button>
+              </div>
+            </div>
+
+            <div id="interaccionesResult" style="display:none; margin-top: 20px; padding: 20px; background: var(--bg); border-radius: 8px; border-left: 4px solid var(--primary);">
+              <h4 style="margin: 0 0 12px 0; color: var(--primary);">📊 Resultados del Análisis</h4>
+              <div id="interaccionesResultContent"></div>
+            </div>
+            
+            <div style="margin-top: 24px; padding: 16px; background: var(--bg); border-radius: 8px;">
+              <h4 style="margin: 0 0 12px 0; font-size: 14px;">Recursos Recomendados:</h4>
+              <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                <li><a href="https://www.drugs.com/drug_interactions.php" target="_blank" style="color: var(--primary);">Drugs.com Drug Interactions Checker</a></li>
+                <li><a href="https://reference.medscape.com/drug-interactionchecker" target="_blank" style="color: var(--primary);">Medscape Drug Interaction Checker</a></li>
+                <li><a href="https://www.uptodate.com/contents/search" target="_blank" style="color: var(--primary);">UpToDate - Base de Datos de Medicamentos</a></li>
+              </ul>
+            </div>
+          </section>
+        </div>
+
+        <div id="plantillasTool" style="display:none;">
+          <a href="javascript:void(0)" class="back-btn" onclick="showMenu()">
+            <span>←</span>
+            <span>Volver al menú</span>
+          </a>
+          
+          <section class="card glass tool-section">
+            <h3>Plantillas</h3>
+            <p class="text-muted">Guarda plantillas de evolución por patología y grupo etario (máx. 10MB por archivo).</p>
+            
+            <div style="margin-top: 16px;">
+              <label style="display: block; margin-bottom: 8px;">
+                <strong>Subir nueva plantilla:</strong>
+              </label>
+              <div style="display: flex; gap: 8px; align-items: end;">
+                <div style="flex: 1;">
+                  <label>Nombre de la plantilla</label>
+                  <input type="text" id="docName" placeholder="Ej: Evolución Neumonía Pediatría">
+                </div>
+                <div style="flex: 1;">
+                  <label>Categoría</label>
+                  <select id="docCategory">
+                    <option value="">Seleccionar categoría</option>
+                    <option value="pediatria">Pediatría</option>
+                    <option value="adultos">Adultos</option>
+                    <option value="geriatria">Geriatría</option>
+                    <option value="neonatologia">Neonatología</option>
+                    <option value="infusiones">Infusiones</option>
+                    <option value="otras">Otras</option>
+                  </select>
+                </div>
+              </div>
+              <div style="margin-top: 12px;">
+                <textarea id="docContent" class="text-editor" placeholder="Escribe o pega el contenido de la plantilla aquí..."></textarea>
+              </div>
+              <div id="adminPlantillaOption" style="margin-top: 12px; display: none;">
+                <label class="switch">
+                  <input id="plantillaGlobal" type="checkbox">
+                  <span class="slider"></span>
+                  <span>Plantilla predefinida (visible para todos los usuarios)</span>
+                </label>
+              </div>
+              <div style="margin-top: 12px; display: flex; gap: 8px;">
+                <button class="btn primary" onclick="guardarDocumento()">Guardar Plantilla</button>
+                <button class="btn" onclick="limpiarFormDoc()">Limpiar Formulario</button>
+              </div>
+            </div>
+
+            <div style="margin-top: 24px;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                  <strong id="plantillasCounter">Plantillas guardadas: 0</strong>
+                </div>
+                <select id="filterCategory" onchange="filtrarDocumentos()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                  <option value="">📂 Todas las categorías</option>
+                  <option value="pediatria">👶 Pediatría</option>
+                  <option value="adultos">👨‍⚕️ Adultos</option>
+                  <option value="geriatria">👴 Geriatría</option>
+                  <option value="neonatologia">👼 Neonatología</option>
+                  <option value="infusiones">💉 Infusiones</option>
+                  <option value="otras">📋 Otras</option>
+                </select>
+                <input type="search" id="searchDoc" placeholder="🔍 Buscar plantilla..." onkeyup="filtrarDocumentos()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; min-width: 200px;">
+              </div>
+              <div id="docList" class="doc-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;"></div>
+            </div>
+          </section>
+        </div>
+        <footer class="app-footer">
+          <h4>Aviso Legal</h4>
+          <p>Las herramientas de Med Tools Hub son de apoyo clínico y no sustituyen el criterio profesional.</p>
+          <p>El uso y aplicación de los resultados son responsabilidad exclusiva de cada profesional de la salud.</p>
+          <p class="trademark">NBR® 2025 | Med Tools Hub</p>
+          <p class="contact">administrador@medtoolshub.com</p>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <div id="editModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; padding:20px;">
+    <div style="max-width: 900px; margin: 40px auto; background: white; border-radius: 8px; padding: 24px; max-height: 90vh; overflow-y: auto;">
+      <h3 id="editDocTitle" style="margin-top: 0;">Editar Plantilla</h3>
+      <div style="margin-bottom: 12px;">
+        <label>Nombre de la plantilla</label>
+        <input type="text" id="editDocName" style="width: 100%;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label>Categoría</label>
+        <select id="editDocCategory" style="width: 100%;">
+          <option value="">Seleccionar categoría</option>
+          <option value="pediatria">Pediatría</option>
+          <option value="adultos">Adultos</option>
+          <option value="geriatria">Geriatría</option>
+          <option value="neonatologia">Neonatología</option>
+          <option value="infusiones">Infusiones</option>
+          <option value="otras">Otras</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label>Contenido</label>
+        <textarea id="editDocContent" class="text-editor"></textarea>
+      </div>
+      <div id="editAdminPlantillaOption" style="margin-bottom: 12px; display: none;">
+        <label class="switch">
+          <input id="editPlantillaGlobal" type="checkbox">
+          <span class="slider"></span>
+          <span>Plantilla predefinida (visible para todos los usuarios)</span>
+        </label>
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="btn" onclick="cerrarEditor()">Cancelar</button>
+        <button class="btn primary" onclick="guardarEdicion()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    let documentos = [];
+    let editandoDocId = null;
+    let currentUser = null;
+    let infusionMedications = [];
+
+    window.initHerramientas = async function() {
+      const session = await checkSession();
+      currentUser = session;
+      
+      if (session.role === 'admin') {
+        document.getElementById('adminPlantillaOption').style.display = 'block';
+        document.getElementById('editAdminPlantillaOption').style.display = 'block';
+        document.getElementById('adminInfusionesLink').style.display = 'inline-block';
+      }
+      
+      loadInfusionMedications();
+      showMenu();
+    }
+
+    function showMenu() {
+      document.getElementById('toolMenu').style.display = 'grid';
+      document.getElementById('correctorTool').style.display = 'none';
+      document.getElementById('gasesTool').style.display = 'none';
+      document.getElementById('infusionesTool').style.display = 'none';
+      document.getElementById('plantillasTool').style.display = 'none';
+      document.getElementById('turnosTool').style.display = 'none';
+      document.getElementById('iaTool').style.display = 'none';
+    }
+
+    function showTool(tool) {
+      document.getElementById('toolMenu').style.display = 'none';
+      document.getElementById('correctorTool').style.display = 'none';
+      document.getElementById('gasesTool').style.display = 'none';
+      document.getElementById('infusionesTool').style.display = 'none';
+      document.getElementById('plantillasTool').style.display = 'none';
+      document.getElementById('turnosTool').style.display = 'none';
+      document.getElementById('iaTool').style.display = 'none';
+      
+      if (tool === 'corrector') {
+        document.getElementById('correctorTool').style.display = 'block';
+      } else if (tool === 'gases') {
+        document.getElementById('gasesTool').style.display = 'block';
+      } else if (tool === 'infusiones') {
+        document.getElementById('infusionesTool').style.display = 'block';
+      } else if (tool === 'plantillas') {
+        document.getElementById('plantillasTool').style.display = 'block';
+        cargarDocumentos();
+      } else if (tool === 'turnos') {
+        document.getElementById('turnosTool').style.display = 'block';
+        cargarTurnos();
+      } else if (tool === 'ia') {
+        document.getElementById('iaTool').style.display = 'block';
+      }
+    }
+
+    function actualizarContadores() {
+      const texto = document.getElementById('textInput').value;
+      const chars = texto.length;
+      const words = texto.trim() === '' ? 0 : texto.trim().split(/\s+/).length;
+      const lines = texto === '' ? 0 : texto.split('\n').length;
+      
+      document.getElementById('charCounter').textContent = chars;
+      document.getElementById('wordCounter').textContent = words;
+      document.getElementById('lineCounter').textContent = lines;
+    }
+
+    function aplicarOperacion(tipo) {
+      const input = document.getElementById('textInput');
+      let texto = input.value;
+      
+      switch(tipo) {
+        case 'espacios':
+          texto = texto
+            .replace(/\s+/g, ' ')
+            .replace(/^\s+|\s+$/g, '')
+            .replace(/\s+([.,;:!?])/g, '$1')
+            .replace(/([.,;:!?])(\w)/g, '$1 $2');
+          break;
+        case 'mayusculas':
+          texto = texto.toUpperCase();
+          break;
+        case 'minusculas':
+          texto = texto.toLowerCase();
+          break;
+        case 'capitalizar':
+          texto = texto.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+          break;
+        case 'oracion':
+          texto = texto.toLowerCase().replace(/(^\w|[.!?]\s+\w)/g, l => l.toUpperCase());
+          break;
+        case 'invertir':
+          texto = texto.split('').reverse().join('');
+          break;
+        case 'eliminarSaltos':
+          texto = texto.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+          break;
+        case 'duplicar':
+          const lineas = texto.split('\n');
+          const unicas = [...new Set(lineas)];
+          texto = unicas.join('\n');
+          break;
+      }
+      
+      input.value = texto;
+      actualizarContadores();
+      showToast('Operación aplicada correctamente', 'success');
+    }
+
+    function limpiarTexto() {
+      document.getElementById('textInput').value = '';
+      actualizarContadores();
+    }
+
+    function copiarTexto() {
+      const texto = document.getElementById('textInput').value;
+      if (!texto) {
+        showToast('No hay texto para copiar', 'error');
+        return;
+      }
+      navigator.clipboard.writeText(texto).then(() => {
+        showToast('Texto copiado al portapapeles', 'success');
+      }).catch(() => {
+        showToast('Error al copiar texto', 'error');
+      });
+    }
+
+    function validateGSAInput(field, value, min, max) {
+      const statusEl = document.getElementById(`status${field}`);
+      if (!statusEl) return;
+      
+      if (value === '' || isNaN(value)) {
+        statusEl.textContent = '';
+        statusEl.style.color = '';
+        return;
+      }
+      
+      const numValue = parseFloat(value);
+      if (numValue < min) {
+        statusEl.textContent = '↓ Bajo';
+        statusEl.style.color = '#ef4444';
+      } else if (numValue > max) {
+        statusEl.textContent = '↑ Alto';
+        statusEl.style.color = '#f59e0b';
+      } else {
+        statusEl.textContent = '✓ Normal';
+        statusEl.style.color = '#10b981';
+      }
+    }
+
+    function interpretarGSA() {
+      const pH = parseFloat(document.getElementById('gsaPH').value);
+      const paCO2 = parseFloat(document.getElementById('gsaPaCO2').value);
+      const paO2 = parseFloat(document.getElementById('gsaPaO2').value);
+      const hco3 = parseFloat(document.getElementById('gsaHCO3').value);
+
+      if (isNaN(pH) || isNaN(paCO2) || isNaN(hco3)) {
+        alert('Por favor, completa al menos pH, PaCO₂ y HCO₃');
+        return;
+      }
+
+      let diagnostico = '';
+      let estado = '';
+      let oxigenacion = '';
+
+      if (pH >= 7.35 && pH <= 7.45) {
+        if (paCO2 >= 35 && paCO2 <= 45 && hco3 >= 22 && hco3 <= 26) {
+          diagnostico = 'Normal';
+          estado = 'Sin alteraciones';
+        } else if (paCO2 > 45 && hco3 > 26) {
+          diagnostico = 'Acidosis Respiratoria';
+          estado = 'Compensada';
+        } else if (paCO2 < 35 && hco3 < 22) {
+          diagnostico = 'Alcalosis Respiratoria';
+          estado = 'Compensada';
+        } else if (paCO2 < 35 && hco3 > 26) {
+          diagnostico = 'Alcalosis Metabólica';
+          estado = 'Compensada';
+        } else if (paCO2 > 45 && hco3 < 22) {
+          diagnostico = 'Acidosis Metabólica';
+          estado = 'Compensada';
+        }
+      } else if (pH < 7.35) {
+        if (paCO2 > 45 && hco3 >= 22 && hco3 <= 26) {
+          diagnostico = 'Acidosis Respiratoria';
+          estado = 'Aguda';
+        } else if (paCO2 > 45 && hco3 > 26) {
+          diagnostico = 'Acidosis Respiratoria';
+          estado = 'Parcialmente Compensada';
+        } else if (hco3 < 22 && paCO2 >= 35 && paCO2 <= 45) {
+          diagnostico = 'Acidosis Metabólica';
+          estado = 'Aguda';
+        } else if (hco3 < 22 && paCO2 < 35) {
+          diagnostico = 'Acidosis Metabólica';
+          estado = 'Parcialmente Compensada';
+        }
+      } else if (pH > 7.45) {
+        if (paCO2 < 35 && hco3 >= 22 && hco3 <= 26) {
+          diagnostico = 'Alcalosis Respiratoria';
+          estado = 'Aguda';
+        } else if (paCO2 < 35 && hco3 < 22) {
+          diagnostico = 'Alcalosis Respiratoria';
+          estado = 'Parcialmente Compensada';
+        } else if (hco3 > 26 && paCO2 >= 35 && paCO2 <= 45) {
+          diagnostico = 'Alcalosis Metabólica';
+          estado = 'Aguda';
+        } else if (hco3 > 26 && paCO2 > 45) {
+          diagnostico = 'Alcalosis Metabólica';
+          estado = 'Parcialmente Compensada';
+        }
+      }
+
+      if (!isNaN(paO2)) {
+        if (paO2 < 60) {
+          oxigenacion = 'Hipoxemia severa';
+        } else if (paO2 < 80) {
+          oxigenacion = 'Hipoxemia moderada';
+        } else if (paO2 >= 80 && paO2 <= 95) {
+          oxigenacion = 'Normal';
+        } else {
+          oxigenacion = 'Hiperoxia';
+        }
+      }
+
+      let html = '<div class="gsa-result">';
+      html += '<h4>📊 Interpretación de Gasometría</h4>';
+      html += `<p><strong>Diagnóstico:</strong> ${diagnostico || 'No determinado'}</p>`;
+      if (estado) html += `<p><strong>Estado:</strong> ${estado}</p>`;
+      if (oxigenacion) html += `<p><strong>Oxigenación:</strong> ${oxigenacion}</p>`;
+      html += '<hr style="margin: 12px 0; border: none; border-top: 1px solid rgba(255,255,255,0.3);">';
+      html += '<p style="font-size: 14px;"><strong>Valores ingresados:</strong></p>';
+      html += `<p style="font-size: 14px;">• pH: ${pH.toFixed(2)} ${pH < 7.35 ? '↓' : pH > 7.45 ? '↑' : '✓'}</p>`;
+      html += `<p style="font-size: 14px;">• PaCO₂: ${paCO2.toFixed(1)} mmHg ${paCO2 < 35 ? '↓' : paCO2 > 45 ? '↑' : '✓'}</p>`;
+      if (!isNaN(paO2)) html += `<p style="font-size: 14px;">• PaO₂: ${paO2.toFixed(1)} mmHg ${paO2 < 80 ? '↓' : paO2 > 95 ? '↑' : '✓'}</p>`;
+      html += `<p style="font-size: 14px;">• HCO₃: ${hco3.toFixed(1)} mEq/L ${hco3 < 22 ? '↓' : hco3 > 26 ? '↑' : '✓'}</p>`;
+      html += '</div>';
+
+      document.getElementById('gsaResult').innerHTML = html;
+      document.getElementById('gsaResult').style.display = 'block';
+    }
+
+    function limpiarGSA() {
+      document.getElementById('gsaPH').value = '';
+      document.getElementById('gsaPaCO2').value = '';
+      document.getElementById('gsaPaO2').value = '';
+      document.getElementById('gsaHCO3').value = '';
+      document.getElementById('statusPH').textContent = '';
+      document.getElementById('statusPaCO2').textContent = '';
+      document.getElementById('statusPaO2').textContent = '';
+      document.getElementById('statusHCO3').textContent = '';
+      document.getElementById('gsaResult').style.display = 'none';
+    }
+
+    document.getElementById('gsaPH')?.addEventListener('input', (e) => {
+      validateGSAInput('PH', e.target.value, 7.35, 7.45);
+    });
+    document.getElementById('gsaPaCO2')?.addEventListener('input', (e) => {
+      validateGSAInput('PaCO2', e.target.value, 35, 45);
+    });
+    document.getElementById('gsaPaO2')?.addEventListener('input', (e) => {
+      validateGSAInput('PaO2', e.target.value, 80, 95);
+    });
+    document.getElementById('gsaHCO3')?.addEventListener('input', (e) => {
+      validateGSAInput('HCO3', e.target.value, 22, 26);
+    });
+
+    function calcularIO() {
+      const fio2Percent = parseFloat(document.getElementById('ioFiO2').value);
+      const map = parseFloat(document.getElementById('ioMAP').value);
+      const pao2 = parseFloat(document.getElementById('ioPaO2').value);
+
+      if (isNaN(fio2Percent) || isNaN(map) || isNaN(pao2)) {
+        alert('Por favor, completa todos los campos (FiO₂, MAP y PaO₂)');
+        return;
+      }
+
+      if (pao2 <= 0) {
+        alert('PaO₂ debe ser mayor que 0');
+        return;
+      }
+
+      const fio2 = fio2Percent / 100;
+      const io = (fio2 * 100 * map) / pao2;
+
+      let interpretacion = '';
+      let severidad = '';
+      let color = '';
+
+      if (io < 4) {
+        interpretacion = 'Oxigenación normal';
+        severidad = 'Sin compromiso respiratorio';
+        color = '#10b981';
+      } else if (io >= 4 && io < 8) {
+        interpretacion = 'Hipoxemia leve';
+        severidad = 'Monitoreo y optimización ventilatoria';
+        color = '#3b82f6';
+      } else if (io >= 8 && io < 16) {
+        interpretacion = 'Hipoxemia moderada';
+        severidad = 'Vigilancia estrecha y ajustes ventilatorios';
+        color = '#f59e0b';
+      } else if (io >= 16 && io < 25) {
+        interpretacion = 'Hipoxemia severa';
+        severidad = 'Considerar estrategias avanzadas de ventilación';
+        color = '#ef4444';
+      } else {
+        interpretacion = 'Hipoxemia crítica';
+        severidad = 'Valorar VAFO, ECMO u otras terapias de rescate';
+        color = '#991b1b';
+      }
+
+      let html = '<div class="gsa-result" style="border-left: 4px solid ' + color + ';">';
+      html += '<h4>📊 Índice de Oxigenación</h4>';
+      html += `<p style="font-size: 24px; font-weight: 700; margin: 12px 0; color: ${color};">IO = ${io.toFixed(2)}</p>`;
+      html += `<p><strong>Interpretación:</strong> ${interpretacion}</p>`;
+      html += `<p><strong>Recomendación:</strong> ${severidad}</p>`;
+      html += '<hr style="margin: 12px 0; border: none; border-top: 1px solid rgba(255,255,255,0.3);">';
+      html += '<p style="font-size: 14px;"><strong>Valores ingresados:</strong></p>';
+      html += `<p style="font-size: 14px;">• FiO₂: ${fio2Percent}% (${fio2.toFixed(2)})</p>`;
+      html += `<p style="font-size: 14px;">• MAP: ${map.toFixed(1)} cmH₂O</p>`;
+      html += `<p style="font-size: 14px;">• PaO₂: ${pao2.toFixed(1)} mmHg</p>`;
+      html += '<hr style="margin: 12px 0; border: none; border-top: 1px solid rgba(255,255,255,0.3);">';
+      html += '<p style="font-size: 13px; opacity: 0.9;"><strong>Fórmula:</strong> IO = (FiO₂ × MAP × 100) / PaO₂</p>';
+      html += '<p style="font-size: 12px; opacity: 0.8;">IO < 4: Normal | 4-8: Leve | 8-16: Moderado | 16-25: Severo | > 25: Crítico</p>';
+      html += '</div>';
+
+      document.getElementById('ioResult').innerHTML = html;
+      document.getElementById('ioResult').style.display = 'block';
+    }
+
+    function limpiarIO() {
+      document.getElementById('ioFiO2').value = '';
+      document.getElementById('ioMAP').value = '';
+      document.getElementById('ioPaO2').value = '';
+      document.getElementById('statusFiO2').textContent = '';
+      document.getElementById('statusMAP').textContent = '';
+      document.getElementById('statusIOPaO2').textContent = '';
+      document.getElementById('ioResult').style.display = 'none';
+    }
+
+    document.getElementById('ioFiO2')?.addEventListener('input', (e) => {
+      const statusEl = document.getElementById('statusFiO2');
+      const value = parseFloat(e.target.value);
+      if (isNaN(value) || value === '') {
+        statusEl.textContent = '';
+      } else if (value < 21) {
+        statusEl.textContent = '↓ Bajo';
+        statusEl.style.color = '#ef4444';
+      } else if (value >= 21 && value <= 40) {
+        statusEl.textContent = '✓ Bajo';
+        statusEl.style.color = '#10b981';
+      } else if (value > 40 && value <= 60) {
+        statusEl.textContent = '⚠ Moderado';
+        statusEl.style.color = '#f59e0b';
+      } else {
+        statusEl.textContent = '⚠ Alto';
+        statusEl.style.color = '#ef4444';
+      }
+    });
+
+    document.getElementById('ioMAP')?.addEventListener('input', (e) => {
+      const statusEl = document.getElementById('statusMAP');
+      const value = parseFloat(e.target.value);
+      if (isNaN(value) || value === '') {
+        statusEl.textContent = '';
+      } else if (value < 5) {
+        statusEl.textContent = '↓ Bajo';
+        statusEl.style.color = '#ef4444';
+      } else if (value >= 5 && value <= 15) {
+        statusEl.textContent = '✓ Normal';
+        statusEl.style.color = '#10b981';
+      } else {
+        statusEl.textContent = '↑ Alto';
+        statusEl.style.color = '#f59e0b';
+      }
+    });
+
+    document.getElementById('ioPaO2')?.addEventListener('input', (e) => {
+      const statusEl = document.getElementById('statusIOPaO2');
+      const value = parseFloat(e.target.value);
+      if (isNaN(value) || value === '') {
+        statusEl.textContent = '';
+      } else if (value < 60) {
+        statusEl.textContent = '↓ Hipoxemia severa';
+        statusEl.style.color = '#ef4444';
+      } else if (value >= 60 && value < 80) {
+        statusEl.textContent = '↓ Hipoxemia moderada';
+        statusEl.style.color = '#f59e0b';
+      } else if (value >= 80 && value <= 95) {
+        statusEl.textContent = '✓ Normal';
+        statusEl.style.color = '#10b981';
+      } else {
+        statusEl.textContent = '↑ Hiperoxia';
+        statusEl.style.color = '#f59e0b';
+      }
+    });
+
+    function initDefaultInfusions() {
+      const existing = localStorage.getItem('infusion_medications_global');
+      if (!existing) {
+        const defaultMeds = [
+          {
+            id: 1,
+            nombre: 'FENTANILO',
+            presentacion: '500MCG/10ML = 50MCG/ML = 0.5MG/10ML',
+            dosis: '1MCG/KG/HORA',
+            unidad: 'mcg/kg/h',
+            diluciones: ['12CC', '24CC', '50CC', '100CC'],
+            concentraciones: [0.88, 0.44, 0.21, 0.11],
+            ssn: '39,4',
+            ssn_percentage: '0.9%'
+          },
+          {
+            id: 2,
+            nombre: 'MIDAZOLAM',
+            presentacion: '15MG/3ML = 5MG/1ML',
+            dosis: '0,1MG/KG/HORA',
+            unidad: 'mg/kg/h',
+            diluciones: ['12CC', '24CC', '50CC', '100CC'],
+            concentraciones: [0.42, 0.21, 0.10, 0.05],
+            ssn: '38,5',
+            ssn_percentage: '0.9%'
+          }
+        ];
+        localStorage.setItem('infusion_medications_global', JSON.stringify(defaultMeds));
+      }
+    }
+
+    async function loadInfusionMedications() {
+      initDefaultInfusions();
+      
+      const localMeds = JSON.parse(localStorage.getItem('infusion_medications_global') || '[]');
+      infusionMedications = localMeds.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      
+      const select = document.getElementById('medicationSelect');
+      if (!select) return;
+      select.innerHTML = '<option value="">Seleccionar medicamento</option>';
+      infusionMedications.forEach((med, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = med.nombre;
+        select.appendChild(option);
+      });
+    }
+
+    function loadMedication() {
+      const select = document.getElementById('medicationSelect');
+      const index = parseInt(select.value);
+      
+      if (isNaN(index)) {
+        document.getElementById('medicationInfo').style.display = 'none';
+        return;
+      }
+      
+      const med = infusionMedications[index];
+      document.getElementById('medicationInfo').style.display = 'block';
+      document.getElementById('presentacion').innerHTML = `<strong>${med.presentacion}</strong>`;
+      
+      let details = `Dosis: ${med.dosis}`;
+      if (med.grupo) details += ` • Grupo: ${med.grupo}`;
+      if (med.comentarios) details += `<br>${med.comentarios}`;
+      document.getElementById('medicationDetails').innerHTML = details;
+      
+      const unidad = med.unidad || 'mcg/kg/h';
+      document.getElementById('dosisLabel').innerHTML = `Dosis <small class="range-indicator">(${unidad})</small>`;
+      
+      document.getElementById('dosis').value = '';
+      document.getElementById('peso').value = '';
+      document.getElementById('statusPeso').textContent = '';
+      document.getElementById('statusDosis').textContent = '';
+      document.getElementById('dosisCalculada').innerHTML = '';
+      document.getElementById('dosisInfusion').innerHTML = '';
+      document.getElementById('ordenMedica').style.display = 'none';
+      
+      const dilucionOptions = document.getElementById('dilucionOptions');
+      dilucionOptions.innerHTML = '';
+      med.diluciones.forEach((dil, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn sm secondary';
+        btn.textContent = dil;
+        btn.onclick = function() {
+          document.querySelectorAll('#dilucionOptions .btn').forEach(b => {
+            b.classList.remove('primary');
+            b.classList.add('secondary');
+            b.removeAttribute('data-selected');
+          });
+          this.classList.remove('secondary');
+          this.classList.add('primary');
+          this.setAttribute('data-selected', 'true');
+          calculateInfusion();
+        };
+        dilucionOptions.appendChild(btn);
+      });
+    }
+
+    function calculateInfusion() {
+      const select = document.getElementById('medicationSelect');
+      const index = parseInt(select.value);
+      
+      if (isNaN(index)) return;
+      
+      const med = infusionMedications[index];
+      const dosis = parseFloat(document.getElementById('dosis').value);
+      const peso = parseFloat(document.getElementById('peso').value);
+      
+      if (isNaN(dosis) || isNaN(peso)) {
+        document.getElementById('dosisCalculada').innerHTML = '';
+        document.getElementById('dosisInfusion').innerHTML = '';
+        document.getElementById('ordenMedica').style.display = 'none';
+        return;
+      }
+      
+      const unidadDosis = med.unidad || 'mcg/kg/h';
+      const esPorMinuto = unidadDosis.includes('/min');
+      const esMcg = unidadDosis.includes('mcg');
+      const esUI = unidadDosis.includes('UI');
+      
+      const concentracionMatch = med.presentacion.match(/=\s*([\d.]+)\s*(MCG|MG|UI)\/(\d*)ML/i);
+      if (!concentracionMatch) {
+        alert('Error: No se pudo extraer la concentración del medicamento. La presentación debe tener el formato: CANTIDAD = XX MCG/ML o XX MG/50ML o XX UI/ML');
+        return;
+      }
+      
+      const concentracionMedicamento = parseFloat(concentracionMatch[1]);
+      const unidadConcentracion = concentracionMatch[2].toUpperCase();
+      
+      let dosisPorHora = dosis * peso;
+      if (esPorMinuto) {
+        dosisPorHora = dosisPorHora * 60;
+      }
+      let dosisPorDia = dosisPorHora * 24;
+      
+      let concentracionEnUnidadDosis;
+      if (esUI && unidadConcentracion === 'UI') {
+        concentracionEnUnidadDosis = concentracionMedicamento;
+      } else if (esMcg && unidadConcentracion === 'MCG') {
+        concentracionEnUnidadDosis = concentracionMedicamento;
+      } else if (esMcg && unidadConcentracion === 'MG') {
+        concentracionEnUnidadDosis = concentracionMedicamento * 1000;
+      } else if (!esMcg && !esUI && unidadConcentracion === 'MG') {
+        concentracionEnUnidadDosis = concentracionMedicamento;
+      } else if (!esMcg && !esUI && unidadConcentracion === 'MCG') {
+        concentracionEnUnidadDosis = concentracionMedicamento / 1000;
+      } else {
+        concentracionEnUnidadDosis = concentracionMedicamento;
+      }
+      
+      let unidadMostrar = esUI ? 'UI' : (esMcg ? 'MCG' : 'MG');
+      let unidadHora = esUI ? 'UI/hora' : (esMcg ? 'mcg/hora' : 'mg/hora');
+      
+      document.getElementById('dosisCalculada').innerHTML = `
+        <p><strong>${unidadMostrar}/DIA:</strong> ${dosisPorDia.toFixed(1)} ${unidadMostrar}</p>
+        <p><strong>Dosis:</strong> ${dosisPorHora.toFixed(2)} ${unidadHora}</p>
+      `;
+      
+      const selectedButton = document.querySelector('#dilucionOptions .btn[data-selected="true"]');
+      if (selectedButton) {
+        const dilucionText = selectedButton.textContent;
+        const dilucionTotal = parseFloat(dilucionText.replace(/[^0-9.]/g, ''));
+        
+        const concentracionPorMl = concentracionEnUnidadDosis;
+        
+        const ccMedicamento = dosisPorDia / concentracionPorMl;
+        const ccDiluyente = Math.max(0, dilucionTotal - ccMedicamento);
+        
+        const concentracionFinal = dosisPorDia / dilucionTotal;
+        let razonCcHora = dosisPorHora / concentracionFinal;
+        
+        document.getElementById('dosisInfusion').innerHTML = `
+          <p><strong>CC de ${med.nombre}:</strong> ${ccMedicamento.toFixed(1)} CC</p>
+          <p><strong>CC de diluyente (SS 0.9%):</strong> ${ccDiluyente.toFixed(1)} CC</p>
+          <p style="font-size:13px;color:var(--muted);margin-top:8px;">Concentración final: ${concentracionFinal.toFixed(2)} ${unidadMostrar}/CC</p>
+        `;
+        
+        window.razonSeleccionada = razonCcHora;
+        
+        const ordenMedica = document.getElementById('ordenMedica');
+        ordenMedica.classList.add('updating');
+        setTimeout(() => ordenMedica.classList.remove('updating'), 500);
+        
+        document.getElementById('ordenMedicaContent').innerHTML = `
+          <p><strong>ORDEN MÉDICA:</strong></p>
+          <p id="ordenTexto">${med.nombre.toUpperCase()} ${ccMedicamento.toFixed(1)}CC + ${ccDiluyente.toFixed(1)}CC DE SS 0.9% PASAR A RAZÓN DE ${razonCcHora.toFixed(1)}CC/HORA</p>
+        `;
+        ordenMedica.style.display = 'block';
+      }
+    }
+
+    function clearInfusion() {
+      document.getElementById('medicationSelect').value = '';
+      document.getElementById('dosis').value = '';
+      document.getElementById('peso').value = '';
+      document.getElementById('medicationInfo').style.display = 'none';
+      document.getElementById('ordenMedica').style.display = 'none';
+    }
+
+
+    function copyInfusionOrder() {
+      const ordenContent = document.getElementById('ordenMedicaContent');
+      
+      if (!ordenContent || ordenContent.innerHTML === '') {
+        alert('Por favor calcula primero la infusión');
+        return;
+      }
+      
+      const ordenText = ordenContent.querySelector('p:last-child').textContent;
+      
+      navigator.clipboard.writeText(ordenText).then(() => {
+        alert('Orden médica copiada al portapapeles');
+      }).catch(() => {
+        alert('No se pudo copiar al portapapeles');
+      });
+    }
+
+    function validateInfusionInput(field, value) {
+      const statusEl = document.getElementById(`status${field}`);
+      if (!statusEl) return;
+      
+      if (value === '' || isNaN(value)) {
+        statusEl.textContent = '';
+        statusEl.style.color = '';
+        return;
+      }
+      
+      const numValue = parseFloat(value);
+      
+      if (field === 'Peso') {
+        if (numValue <= 0) {
+          statusEl.textContent = '⚠️ Debe ser mayor a 0';
+          statusEl.style.color = '#ef4444';
+        } else if (numValue < 0.5) {
+          statusEl.textContent = '⚠️ Peso muy bajo';
+          statusEl.style.color = '#f59e0b';
+        } else if (numValue > 150) {
+          statusEl.textContent = '⚠️ Peso muy alto';
+          statusEl.style.color = '#f59e0b';
+        } else {
+          statusEl.textContent = '✓ OK';
+          statusEl.style.color = '#10b981';
+        }
+      } else if (field === 'Dosis') {
+        if (numValue <= 0) {
+          statusEl.textContent = '⚠️ Debe ser mayor a 0';
+          statusEl.style.color = '#ef4444';
+        } else if (numValue > 100) {
+          statusEl.textContent = '⚠️ Dosis muy alta';
+          statusEl.style.color = '#f59e0b';
+        } else {
+          statusEl.textContent = '✓ OK';
+          statusEl.style.color = '#10b981';
+        }
+      }
+    }
+
+    document.getElementById('peso')?.addEventListener('input', (e) => {
+      validateInfusionInput('Peso', e.target.value);
+      calculateInfusion();
+    });
+    
+    document.getElementById('dosis')?.addEventListener('input', (e) => {
+      validateInfusionInput('Dosis', e.target.value);
+      calculateInfusion();
+    });
+
+    async function guardarDocumento() {
+      const nombre = document.getElementById('docName').value.trim();
+      const categoria = document.getElementById('docCategory').value;
+      const contenido = document.getElementById('docContent').value.trim();
+      const isGlobal = document.getElementById('plantillaGlobal')?.checked || false;
+
+      if (!nombre) {
+        alert('Por favor, ingresa un nombre para la plantilla');
+        return;
+      }
+      if (!categoria) {
+        alert('Por favor, selecciona una categoría');
+        return;
+      }
+      if (!contenido) {
+        alert('Por favor, ingresa el contenido de la plantilla');
+        return;
+      }
+
+      const tamanio = new Blob([contenido]).size;
+      if (tamanio > 10 * 1024 * 1024) {
+        alert('La plantilla excede el tamaño máximo de 10MB');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/plantillas', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            nombre: nombre,
+            categoria: categoria,
+            contenido: contenido,
+            global: isGlobal
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          limpiarFormDoc();
+          cargarDocumentos();
+          alert('Plantilla guardada exitosamente');
+        } else {
+          alert('Error: ' + (data.error || 'No se pudo guardar la plantilla'));
+        }
+      } catch (err) {
+        console.error('Error guardando plantilla:', err);
+        alert('Error al guardar la plantilla');
+      }
+    }
+
+    function limpiarFormDoc() {
+      document.getElementById('docName').value = '';
+      document.getElementById('docCategory').value = '';
+      document.getElementById('docContent').value = '';
+      if (document.getElementById('plantillaGlobal')) {
+        document.getElementById('plantillaGlobal').checked = false;
+      }
+    }
+
+    async function cargarDocumentos() {
+      try {
+        const response = await fetch('/api/plantillas');
+        
+        if (response.ok) {
+          documentos = await response.json();
+          mostrarDocumentos();
+        } else {
+          console.error('Error cargando plantillas:', response.statusText);
+          documentos = [];
+          mostrarDocumentos();
+        }
+      } catch (err) {
+        console.error('Error cargando plantillas:', err);
+        documentos = [];
+        mostrarDocumentos();
+      }
+    }
+
+    function mostrarDocumentos(filtrados = null) {
+      const lista = filtrados || documentos;
+      const container = document.getElementById('docList');
+      const counter = document.getElementById('plantillasCounter');
+      
+      if (counter) {
+        counter.textContent = `Plantillas guardadas: ${lista.length}`;
+      }
+      
+      if (lista.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #718096;">
+            <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
+            <p style="margin: 0; font-size: 16px;">No hay plantillas guardadas</p>
+          </div>
+        `;
+        return;
+      }
+
+      const getCategoryIcon = (cat) => {
+        const icons = {
+          'pediatria': '👶',
+          'adultos': '👨‍⚕️',
+          'geriatria': '👴',
+          'neonatologia': '👼',
+          'infusiones': '💉',
+          'otras': '📋'
+        };
+        return icons[cat] || '📄';
+      };
+
+      container.innerHTML = lista.map((doc, index) => {
+        const fecha = new Date(doc.fecha || doc.created_at).toLocaleDateString('es-ES');
+        const tamanioKB = (doc.tamanio / 1024).toFixed(1);
+        const esPropia = doc.creador === currentUser?.username;
+        const esAdmin = currentUser?.role === 'admin';
+        const puedeEditar = esPropia || esAdmin;
+        const icon = getCategoryIcon(doc.categoria);
+        
+        return `
+          <div class="doc-item" style="
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            animation: fadeIn 0.3s ease-in-out ${index * 0.05}s both;
+            position: relative;
+            overflow: hidden;
+          " onmouseenter="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.1)';" onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+            ${doc.global ? '<div style="position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">PREDEFINIDA</div>' : ''}
+            <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px;">
+              <div style="font-size: 32px; line-height: 1;">${icon}</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 600; font-size: 16px; color: #2d3748; margin-bottom: 4px;">${doc.nombre}</div>
+                <div style="font-size: 13px; color: #718096;">
+                  ${doc.categoria.charAt(0).toUpperCase() + doc.categoria.slice(1)}
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; font-size: 12px; color: #a0aec0; margin-bottom: 16px;">
+              <span>📦 ${tamanioKB} KB</span>
+              <span>•</span>
+              <span>📅 ${fecha}</span>
+              ${!doc.global ? `<span>•</span><span>👤 ${doc.creador}</span>` : ''}
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              ${puedeEditar ? `<button class="btn sm" onclick="event.stopPropagation(); editarDocumento(${doc.id})" style="flex: 1; min-width: 80px;">✏️ Editar</button>` : ''}
+              <button class="btn sm" onclick="event.stopPropagation(); descargarDocumento(${doc.id})" style="flex: 1; min-width: 80px;">⬇️ Descargar</button>
+              ${puedeEditar ? `<button class="btn danger sm" onclick="event.stopPropagation(); eliminarDocumento(${doc.id})" style="min-width: 80px;">🗑️</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    function filtrarDocumentos() {
+      const categoria = document.getElementById('filterCategory').value;
+      const busqueda = document.getElementById('searchDoc').value.toLowerCase();
+      
+      let filtrados = documentos;
+      
+      if (categoria) {
+        filtrados = filtrados.filter(doc => doc.categoria === categoria);
+      }
+      
+      if (busqueda) {
+        filtrados = filtrados.filter(doc => 
+          doc.nombre.toLowerCase().includes(busqueda) ||
+          doc.contenido.toLowerCase().includes(busqueda)
+        );
+      }
+      
+      mostrarDocumentos(filtrados);
+    }
+
+    function editarDocumento(id) {
+      const doc = documentos.find(d => d.id === id);
+      if (!doc) return;
+      
+      editandoDocId = id;
+      document.getElementById('editDocName').value = doc.nombre;
+      document.getElementById('editDocCategory').value = doc.categoria;
+      document.getElementById('editDocContent').value = doc.contenido;
+      
+      if (currentUser?.role === 'admin' && doc.global) {
+        document.getElementById('editPlantillaGlobal').checked = true;
+      } else {
+        document.getElementById('editPlantillaGlobal').checked = false;
+      }
+      
+      document.getElementById('editModal').style.display = 'block';
+    }
+
+    function cerrarEditor() {
+      editandoDocId = null;
+      document.getElementById('editModal').style.display = 'none';
+    }
+
+    async function guardarEdicion() {
+      if (!editandoDocId) return;
+      
+      const nombre = document.getElementById('editDocName').value.trim();
+      const categoria = document.getElementById('editDocCategory').value;
+      const contenido = document.getElementById('editDocContent').value.trim();
+      const isGlobal = document.getElementById('editPlantillaGlobal')?.checked || false;
+      
+      if (!nombre || !categoria || !contenido) {
+        alert('Por favor, completa todos los campos');
+        return;
+      }
+      
+      const tamanio = new Blob([contenido]).size;
+      if (tamanio > 10 * 1024 * 1024) {
+        alert('La plantilla excede el tamaño máximo de 10MB');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/plantillas/${editandoDocId}`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            nombre: nombre,
+            categoria: categoria,
+            contenido: contenido,
+            global: isGlobal
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          cerrarEditor();
+          cargarDocumentos();
+          alert('Plantilla actualizada exitosamente');
+        } else {
+          alert('Error: ' + (data.error || 'No se pudo actualizar la plantilla'));
+        }
+      } catch (err) {
+        console.error('Error actualizando plantilla:', err);
+        alert('Error al actualizar la plantilla');
+      }
+    }
+
+    function descargarDocumento(id) {
+      const doc = documentos.find(d => d.id === id);
+      if (!doc) return;
+      
+      const blob = new Blob([doc.contenido], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${doc.nombre}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function eliminarDocumento(id) {
+      const doc = documentos.find(d => d.id === id);
+      if (!doc) return;
+      
+      if (!confirm(`¿Estás seguro de eliminar la plantilla "${doc.nombre}"?`)) return;
+      
+      try {
+        const response = await fetch(`/api/plantillas/${id}`, {
+          method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          cargarDocumentos();
+          alert('Plantilla eliminada');
+        } else {
+          alert('Error: ' + (data.error || 'No se pudo eliminar la plantilla'));
+        }
+      } catch (err) {
+        console.error('Error eliminando plantilla:', err);
+        alert('Error al eliminar la plantilla');
+      }
+    }
+
+    let turnos = [];
+    let calendarioMesActual = new Date().getMonth();
+    let calendarioAnioActual = new Date().getFullYear();
+
+    function guardarTurno() {
+      const fecha = document.getElementById('turnoFecha').value;
+      const horaInicio = document.getElementById('turnoHoraInicio').value;
+      const horaFin = document.getElementById('turnoHoraFin').value;
+      const valor = parseFloat(document.getElementById('turnoValor').value) || 0;
+      const lugar = document.getElementById('turnoLugar').value.trim();
+      const tipo = document.getElementById('turnoTipo').value;
+      const paymentType = document.getElementById('turnoPaymentType').value;
+      const notas = document.getElementById('turnoNotas').value.trim();
+
+      if (!fecha || !horaInicio || !horaFin) {
+        alert('Por favor completa fecha, hora de inicio y hora de fin');
+        return;
+      }
+
+      const turno = {
+        id: Date.now(),
+        fecha,
+        horaInicio,
+        horaFin,
+        valor,
+        lugar,
+        tipo,
+        paymentType,
+        notas,
+        creador: currentUser?.username || 'unknown',
+        isExchange: false
+      };
+
+      const storageKey = 'turnos_' + (currentUser?.username || 'local');
+      const turnosExistentes = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      turnosExistentes.push(turno);
+      localStorage.setItem(storageKey, JSON.stringify(turnosExistentes));
+
+      cerrarFormTurno();
+      cargarTurnos();
+      alert('Turno guardado exitosamente');
+    }
+
+    function limpiarFormTurno() {
+      document.getElementById('turnoFecha').value = '';
+      document.getElementById('turnoHoraInicio').value = '';
+      document.getElementById('turnoHoraFin').value = '';
+      document.getElementById('turnoValor').value = '';
+      document.getElementById('turnoLugar').value = '';
+      document.getElementById('turnoTipo').value = 'guardia';
+      document.getElementById('turnoPaymentType').value = 'ops';
+      document.getElementById('turnoNotas').value = '';
+    }
+
+    function cerrarFormTurno() {
+      document.getElementById('formTurnoContainer').style.display = 'none';
+      limpiarFormTurno();
+    }
+
+    function abrirFormTurno(fecha = null) {
+      if (fecha) {
+        document.getElementById('turnoFecha').value = fecha;
+        
+        const turnosDia = turnos.filter(t => t.fecha === fecha);
+        const turnosDiaActual = document.getElementById('turnosDiaActual');
+        const listaTurnosDia = document.getElementById('listaTurnosDia');
+        
+        if (turnosDia.length > 0) {
+          turnosDiaActual.style.display = 'block';
+          const fechaObj = new Date(fecha);
+          const opciones = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+          const fechaFormateada = fechaObj.toLocaleDateString('es-ES', opciones);
+          document.getElementById('tituloFormTurno').textContent = `Agregar turno - ${fechaFormateada}`;
+          
+          listaTurnosDia.innerHTML = turnosDia.map(t => {
+            const colorTipo = {
+              'guardia': '#ff8c00',
+              'consulta': '#10b981',
+              'cirugia': '#ef4444',
+              'otro': '#6366f1'
+            }[t.tipo] || '#6366f1';
+            
+            return `
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
+                <div style="width: 4px; height: 40px; background: ${colorTipo}; border-radius: 2px;"></div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; font-size: 13px;">${t.horaInicio} - ${t.horaFin} | ${t.tipo.toUpperCase()}</div>
+                  <div style="font-size: 12px; color: var(--muted);">${t.lugar}${t.valor > 0 ? ' | $' + t.valor.toFixed(2) : ''}</div>
+                </div>
+                <button class="btn danger sm" onclick="eliminarTurno(${t.id})">Eliminar</button>
+              </div>
+            `;
+          }).join('');
+        } else {
+          turnosDiaActual.style.display = 'none';
+          document.getElementById('tituloFormTurno').textContent = 'Agregar Turno';
+        }
+      }
+      document.getElementById('formTurnoContainer').style.display = 'block';
+    }
+
+    function cargarTurnos() {
+      const storageKey = 'turnos_' + (currentUser?.username || 'local');
+      turnos = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      renderizarCalendario();
+    }
+
+    function cambiarMesCalendario(delta) {
+      calendarioMesActual += delta;
+      if (calendarioMesActual > 11) {
+        calendarioMesActual = 0;
+        calendarioAnioActual++;
+      } else if (calendarioMesActual < 0) {
+        calendarioMesActual = 11;
+        calendarioAnioActual--;
+      }
+      renderizarCalendario();
+    }
+
+    function renderizarCalendario() {
+      const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      
+      document.getElementById('calendarioMesAnio').textContent = `${meses[calendarioMesActual]} ${calendarioAnioActual}`;
+      
+      const primerDia = new Date(calendarioAnioActual, calendarioMesActual, 1).getDay();
+      const ultimoDia = new Date(calendarioAnioActual, calendarioMesActual + 1, 0).getDate();
+      
+      const calendarioHTML = [];
+      
+      diasSemana.forEach(dia => {
+        calendarioHTML.push(`<div style="text-align:center;font-weight:700;padding:8px;background:var(--primary);color:white;border-radius:6px;font-size:12px;">${dia}</div>`);
+      });
+      
+      for (let i = 0; i < primerDia; i++) {
+        calendarioHTML.push('<div style="min-height:80px;background:rgba(128,128,128,0.1);border-radius:6px;"></div>');
+      }
+      
+      const turnosDelMes = turnos.filter(t => {
+        const fechaTurno = new Date(t.fecha);
+        return fechaTurno.getMonth() === calendarioMesActual && fechaTurno.getFullYear() === calendarioAnioActual;
+      });
+      
+      const now = new Date();
+      const colombiaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+      const hoyDia = colombiaTime.getDate();
+      const hoyMes = colombiaTime.getMonth();
+      const hoyAnio = colombiaTime.getFullYear();
+      
+      for (let dia = 1; dia <= ultimoDia; dia++) {
+        const fecha = `${calendarioAnioActual}-${String(calendarioMesActual + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+        const turnosDia = turnosDelMes.filter(t => t.fecha === fecha);
+        const esHoy = (dia === hoyDia && calendarioMesActual === hoyMes && calendarioAnioActual === hoyAnio);
+        
+        let diaHTML = `<div onclick="abrirFormTurno('${fecha}')" style="min-height:80px;padding:4px;border-radius:6px;cursor:pointer;transition:all 0.2s;background:${esHoy ? 'rgba(0,139,139,0.15)' : 'var(--card)'};border:${esHoy ? '2px solid var(--primary)' : '1px solid var(--border)'};" onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none';">`;
+        diaHTML += `<div style="font-weight:700;margin-bottom:4px;color:${esHoy ? 'var(--primary)' : 'var(--text)'};">${dia}</div>`;
+        
+        turnosDia.forEach(turno => {
+          const colorTipo = {
+            'guardia': '#ff8c00',
+            'consulta': '#10b981',
+            'cirugia': '#ef4444',
+            'otro': '#6366f1'
+          }[turno.tipo] || '#6366f1';
+          
+          const exchangeIcon = turno.isExchange ? '🔄 ' : '';
+          const paymentIcon = turno.paymentType === 'nomina' ? '💰' : '📊';
+          const tooltipText = `${turno.tipo} - ${turno.lugar} ${turno.horaInicio}-${turno.horaFin}${turno.isExchange ? ' (INTERCAMBIO)' : ''} | ${turno.paymentType === 'nomina' ? 'Nómina' : 'OPS'}`;
+          const borderStyle = turno.isExchange ? `border: 2px dashed white;` : '';
+          
+          diaHTML += `<div style="background:${colorTipo};color:white;font-size:10px;padding:2px 4px;border-radius:4px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${borderStyle}" title="${tooltipText}">${exchangeIcon}${paymentIcon} ${turno.horaInicio} ${turno.tipo}</div>`;
+        });
+        
+        diaHTML += '</div>';
+        calendarioHTML.push(diaHTML);
+      }
+      
+      document.getElementById('calendarioTurnos').innerHTML = calendarioHTML.join('');
+      
+      actualizarResumenMensual(turnosDelMes);
+    }
+    
+    function actualizarResumenMensual(turnosMes) {
+      const now = new Date();
+      const mesActual = now.getMonth();
+      const anioActual = now.getFullYear();
+      
+      const turnosMesActual = turnosMes.filter(t => {
+        const fechaTurno = new Date(t.fecha);
+        return fechaTurno.getMonth() === mesActual && fechaTurno.getFullYear() === anioActual;
+      });
+      
+      const total = turnosMesActual.length;
+      const valorTotal = turnosMesActual.reduce((sum, t) => sum + t.valor, 0);
+      
+      const porUbicacion = {};
+      turnosMesActual.forEach(t => {
+        const ubicacion = t.lugar || 'Sin ubicación';
+        if (!porUbicacion[ubicacion]) {
+          porUbicacion[ubicacion] = {
+            count: 0,
+            valor: 0,
+            nomina: 0,
+            ops: 0,
+            valorNomina: 0,
+            valorOps: 0
+          };
+        }
+        porUbicacion[ubicacion].count++;
+        porUbicacion[ubicacion].valor += t.valor || 0;
+        
+        const paymentType = t.paymentType || 'ops';
+        if (paymentType === 'nomina') {
+          porUbicacion[ubicacion].nomina++;
+          porUbicacion[ubicacion].valorNomina += t.valor || 0;
+        } else {
+          porUbicacion[ubicacion].ops++;
+          porUbicacion[ubicacion].valorOps += t.valor || 0;
+        }
+      });
+      
+      const totalNomina = turnosMesActual.filter(t => (t.paymentType || 'ops') === 'nomina').length;
+      const totalOps = turnosMesActual.filter(t => (t.paymentType || 'ops') === 'ops').length;
+      const valorNomina = turnosMesActual.filter(t => (t.paymentType || 'ops') === 'nomina').reduce((sum, t) => sum + t.valor, 0);
+      const valorOps = turnosMesActual.filter(t => (t.paymentType || 'ops') === 'ops').reduce((sum, t) => sum + t.valor, 0);
+      
+      let html = '<div style="margin-bottom: 16px;">';
+      html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">';
+      html += `<div style="padding: 12px; background: linear-gradient(135deg, var(--g1), var(--g2)); border-radius: 8px; color: white;">
+        <div style="font-size: 12px; opacity: 0.9;">Total Turnos</div>
+        <div style="font-size: 24px; font-weight: 700;">${total}</div>
+      </div>`;
+      html += `<div style="padding: 12px; background: linear-gradient(135deg, var(--g1), var(--g2)); border-radius: 8px; color: white;">
+        <div style="font-size: 12px; opacity: 0.9;">Valor Total</div>
+        <div style="font-size: 24px; font-weight: 700;">$${valorTotal.toFixed(2)}</div>
+      </div>`;
+      html += '</div>';
+      
+      html += '<div style="margin-bottom: 16px;">';
+      html += '<h5 style="margin: 0 0 8px 0; color: var(--primary);">Por Tipo de Pago</h5>';
+      html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">';
+      html += `<div style="padding: 10px; background: rgba(0,139,139,0.1); border-radius: 6px; border-left: 3px solid #10b981;">
+        <div style="font-weight: 600; color: #10b981;">💰 Nómina</div>
+        <div style="font-size: 13px; margin-top: 4px;">Turnos: ${totalNomina} | Valor: $${valorNomina.toFixed(2)}</div>
+      </div>`;
+      html += `<div style="padding: 10px; background: rgba(0,139,139,0.1); border-radius: 6px; border-left: 3px solid #f59e0b;">
+        <div style="font-weight: 600; color: #f59e0b;">📊 OPS</div>
+        <div style="font-size: 13px; margin-top: 4px;">Turnos: ${totalOps} | Valor: $${valorOps.toFixed(2)}</div>
+      </div>`;
+      html += '</div>';
+      html += '</div>';
+      
+      if (Object.keys(porUbicacion).length > 0) {
+        html += '<div>';
+        html += '<h5 style="margin: 0 0 8px 0; color: var(--primary);">Desglose por Ubicación</h5>';
+        Object.keys(porUbicacion).sort().forEach(ubicacion => {
+          const data = porUbicacion[ubicacion];
+          html += `<div style="padding: 10px; background: rgba(0,139,139,0.05); border-radius: 6px; margin-bottom: 8px; border-left: 3px solid var(--primary);">
+            <div style="font-weight: 600; margin-bottom: 6px;">📍 ${ubicacion}</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; font-size: 13px;">
+              <div>Total: ${data.count} turnos</div>
+              <div>Valor: $${data.valor.toFixed(2)}</div>
+              <div style="color: #10b981;">Nómina: ${data.nomina} ($${data.valorNomina.toFixed(2)})</div>
+              <div style="color: #f59e0b;">OPS: ${data.ops} ($${data.valorOps.toFixed(2)})</div>
+            </div>
+          </div>`;
+        });
+        html += '</div>';
+      }
+      
+      html += '</div>';
+      
+      document.getElementById('resumenTurnos').innerHTML = html;
+    }
+
+    function eliminarTurno(id) {
+      if (!confirm('¿Estás seguro de eliminar este turno?')) return;
+
+      const storageKey = 'turnos_' + (currentUser?.username || 'local');
+      const turnosExistentes = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const filtered = turnosExistentes.filter(t => t.id !== id);
+      localStorage.setItem(storageKey, JSON.stringify(filtered));
+
+      cargarTurnos();
+      alert('Turno eliminado');
+    }
+
+    let cambiosTurno = [];
+
+    function mostrarVistaCalendario() {
+      document.getElementById('vistaCalendario').style.display = 'block';
+      document.getElementById('vistaNomina').style.display = 'none';
+      document.getElementById('vistaOPS').style.display = 'none';
+      document.getElementById('vistaCambios').style.display = 'none';
+      
+      document.getElementById('btnVistaCalendario').style.background = 'var(--primary)';
+      document.getElementById('btnVistaCalendario').style.color = 'white';
+      document.getElementById('btnVistaCalendario').classList.remove('secondary');
+      
+      document.getElementById('btnVistaNomina').style.background = '';
+      document.getElementById('btnVistaNomina').style.color = '';
+      document.getElementById('btnVistaNomina').classList.add('secondary');
+      
+      document.getElementById('btnVistaOPS').style.background = '';
+      document.getElementById('btnVistaOPS').style.color = '';
+      document.getElementById('btnVistaOPS').classList.add('secondary');
+      
+      document.getElementById('btnVistaCambios').style.background = '';
+      document.getElementById('btnVistaCambios').style.color = '';
+      document.getElementById('btnVistaCambios').classList.add('secondary');
+    }
+
+    function mostrarVistaCambios() {
+      document.getElementById('vistaCalendario').style.display = 'none';
+      document.getElementById('vistaNomina').style.display = 'none';
+      document.getElementById('vistaOPS').style.display = 'none';
+      document.getElementById('vistaCambios').style.display = 'block';
+      
+      document.getElementById('btnVistaCalendario').style.background = '';
+      document.getElementById('btnVistaCalendario').style.color = '';
+      document.getElementById('btnVistaCalendario').classList.add('secondary');
+      
+      document.getElementById('btnVistaNomina').style.background = '';
+      document.getElementById('btnVistaNomina').style.color = '';
+      document.getElementById('btnVistaNomina').classList.add('secondary');
+      
+      document.getElementById('btnVistaOPS').style.background = '';
+      document.getElementById('btnVistaOPS').style.color = '';
+      document.getElementById('btnVistaOPS').classList.add('secondary');
+      
+      document.getElementById('btnVistaCambios').style.background = 'var(--primary)';
+      document.getElementById('btnVistaCambios').style.color = 'white';
+      document.getElementById('btnVistaCambios').classList.remove('secondary');
+      
+      cargarCambios();
+    }
+
+    function guardarCambioTurno() {
+      const medico = document.getElementById('cambioMedico').value.trim();
+      const miTurno = document.getElementById('cambioMiTurno').value;
+      const turnoAsumido = document.getElementById('cambioTurnoAsumido').value;
+      const tipo = document.getElementById('cambioTipo').value;
+      const notas = document.getElementById('cambioNotas').value.trim();
+
+      if (!medico || !miTurno || !turnoAsumido) {
+        alert('Por favor completa todos los campos requeridos');
+        return;
+      }
+
+      const cambio = {
+        id: Date.now(),
+        medico,
+        miTurno,
+        turnoAsumido,
+        tipo,
+        notas,
+        fecha: new Date().toISOString(),
+        creador: currentUser?.username || 'unknown'
+      };
+
+      const storageKey = 'cambios_turno_' + (currentUser?.username || 'local');
+      const cambiosExistentes = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      cambiosExistentes.push(cambio);
+      localStorage.setItem(storageKey, JSON.stringify(cambiosExistentes));
+
+      const turnoIntercambiado = {
+        id: Date.now() + 1,
+        fecha: turnoAsumido,
+        horaInicio: '00:00',
+        horaFin: '23:59',
+        valor: 0,
+        lugar: `Cambio con ${medico}`,
+        tipo: tipo,
+        paymentType: 'ops',
+        notas: `Intercambio de turno. Mi turno original: ${new Date(miTurno).toLocaleDateString('es-ES')}. ${notas}`,
+        creador: currentUser?.username || 'unknown',
+        isExchange: true,
+        exchangeDetails: {
+          medico: medico,
+          miTurno: miTurno,
+          cambioId: cambio.id
+        }
+      };
+
+      const storageKeyTurnos = 'turnos_' + (currentUser?.username || 'local');
+      const turnosExistentes = JSON.parse(localStorage.getItem(storageKeyTurnos) || '[]');
+      turnosExistentes.push(turnoIntercambiado);
+      localStorage.setItem(storageKeyTurnos, JSON.stringify(turnosExistentes));
+
+      limpiarFormCambio();
+      cargarCambios();
+      cargarTurnos();
+      alert('Cambio de turno registrado exitosamente y agregado al calendario');
+    }
+
+    function limpiarFormCambio() {
+      document.getElementById('cambioMedico').value = '';
+      document.getElementById('cambioMiTurno').value = '';
+      document.getElementById('cambioTurnoAsumido').value = '';
+      document.getElementById('cambioTipo').value = 'guardia';
+      document.getElementById('cambioNotas').value = '';
+    }
+
+    function cargarCambios() {
+      const storageKey = 'cambios_turno_' + (currentUser?.username || 'local');
+      cambiosTurno = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      mostrarCambios();
+    }
+
+    function mostrarCambios() {
+      const listaCambios = document.getElementById('listaCambios');
+      
+      if (cambiosTurno.length === 0) {
+        listaCambios.innerHTML = '<p class="text-muted">No hay cambios de turno registrados</p>';
+        return;
+      }
+
+      cambiosTurno.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+      listaCambios.innerHTML = cambiosTurno.map(cambio => {
+        const miTurnoFecha = new Date(cambio.miTurno).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+        const turnoAsumidoFecha = new Date(cambio.turnoAsumido).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+        
+        const colorTipo = {
+          'guardia': '#ff8c00',
+          'consulta': '#10b981',
+          'cirugia': '#ef4444',
+          'otro': '#6366f1'
+        }[cambio.tipo] || '#6366f1';
+
+        return `
+          <div class="doc-item" style="border-left: 4px solid ${colorTipo};">
+            <div style="flex: 1;">
+              <div class="doc-name">Cambio con: ${cambio.medico}</div>
+              <div class="doc-meta">
+                <span style="color: #ef4444;">➡ Cedo: ${miTurnoFecha}</span> | 
+                <span style="color: #10b981;">➡ Asumo: ${turnoAsumidoFecha}</span> | 
+                <span style="background: ${colorTipo}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">${cambio.tipo.toUpperCase()}</span>
+              </div>
+              ${cambio.notas ? `<div class="doc-meta" style="margin-top: 4px; font-style: italic;">${cambio.notas}</div>` : ''}
+            </div>
+            <button class="btn sm danger" onclick="eliminarCambio(${cambio.id})">Eliminar</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function eliminarCambio(id) {
+      if (!confirm('¿Estás seguro de eliminar este cambio de turno?')) return;
+
+      const storageKey = 'cambios_turno_' + (currentUser?.username || 'local');
+      const cambiosExistentes = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const filtered = cambiosExistentes.filter(c => c.id !== id);
+      localStorage.setItem(storageKey, JSON.stringify(filtered));
+
+      cargarCambios();
+      alert('Cambio de turno eliminado');
+    }
+
+    function mostrarVistaNomina() {
+      document.getElementById('vistaCalendario').style.display = 'none';
+      document.getElementById('vistaNomina').style.display = 'block';
+      document.getElementById('vistaOPS').style.display = 'none';
+      document.getElementById('vistaCambios').style.display = 'none';
+      
+      document.getElementById('btnVistaCalendario').classList.add('secondary');
+      document.getElementById('btnVistaCalendario').style.background = '';
+      document.getElementById('btnVistaCalendario').style.color = '';
+      
+      document.getElementById('btnVistaNomina').classList.remove('secondary');
+      document.getElementById('btnVistaNomina').style.background = 'var(--primary)';
+      document.getElementById('btnVistaNomina').style.color = 'white';
+      
+      document.getElementById('btnVistaOPS').classList.add('secondary');
+      document.getElementById('btnVistaOPS').style.background = '';
+      document.getElementById('btnVistaOPS').style.color = '';
+      
+      document.getElementById('btnVistaCambios').classList.add('secondary');
+      document.getElementById('btnVistaCambios').style.background = '';
+      document.getElementById('btnVistaCambios').style.color = '';
+    }
+
+    function mostrarVistaOPS() {
+      document.getElementById('vistaCalendario').style.display = 'none';
+      document.getElementById('vistaNomina').style.display = 'none';
+      document.getElementById('vistaOPS').style.display = 'block';
+      document.getElementById('vistaCambios').style.display = 'none';
+      
+      document.getElementById('btnVistaCalendario').classList.add('secondary');
+      document.getElementById('btnVistaCalendario').style.background = '';
+      document.getElementById('btnVistaCalendario').style.color = '';
+      
+      document.getElementById('btnVistaNomina').classList.add('secondary');
+      document.getElementById('btnVistaNomina').style.background = '';
+      document.getElementById('btnVistaNomina').style.color = '';
+      
+      document.getElementById('btnVistaOPS').classList.remove('secondary');
+      document.getElementById('btnVistaOPS').style.background = 'var(--primary)';
+      document.getElementById('btnVistaOPS').style.color = 'white';
+      
+      document.getElementById('btnVistaCambios').classList.add('secondary');
+      document.getElementById('btnVistaCambios').style.background = '';
+      document.getElementById('btnVistaCambios').style.color = '';
+    }
+
+    function generarTurnosNomina() {
+      const salario = parseFloat(document.getElementById('nominaSalarioFijo').value);
+      const lugar = document.getElementById('nominaLugar').value.trim();
+      const horaInicio = document.getElementById('nominaHoraInicio').value;
+      const horaFin = document.getElementById('nominaHoraFin').value;
+      const tipo = document.getElementById('nominaTipo').value;
+
+      const diasSeleccionados = [];
+      for (let i = 0; i <= 6; i++) {
+        if (document.getElementById(`nominaDia${i}`).checked) {
+          diasSeleccionados.push(i);
+        }
+      }
+
+      if (!salario || salario <= 0) {
+        alert('Por favor ingresa un salario mensual válido');
+        return;
+      }
+
+      if (!lugar) {
+        alert('Por favor ingresa el lugar de trabajo');
+        return;
+      }
+
+      if (diasSeleccionados.length === 0) {
+        alert('Por favor selecciona al menos un día de trabajo');
+        return;
+      }
+
+      const now = new Date();
+      const mesActual = now.getMonth();
+      const anioActual = now.getFullYear();
+      const ultimoDia = new Date(anioActual, mesActual + 1, 0).getDate();
+
+      const turnosACrear = [];
+      let totalDiasEnMes = 0;
+
+      for (let dia = 1; dia <= ultimoDia; dia++) {
+        const fecha = new Date(anioActual, mesActual, dia);
+        const diaSemana = fecha.getDay();
+
+        if (diasSeleccionados.includes(diaSemana)) {
+          totalDiasEnMes++;
+        }
+      }
+
+      if (totalDiasEnMes === 0) {
+        alert('No hay días de trabajo en el mes actual con los días seleccionados');
+        return;
+      }
+
+      const valorPorTurno = salario / totalDiasEnMes;
+
+      for (let dia = 1; dia <= ultimoDia; dia++) {
+        const fecha = new Date(anioActual, mesActual, dia);
+        const diaSemana = fecha.getDay();
+
+        if (diasSeleccionados.includes(diaSemana)) {
+          const fechaStr = `${anioActual}-${String(mesActual + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+          
+          turnosACrear.push({
+            id: Date.now() + Math.random(),
+            fecha: fechaStr,
+            horaInicio: horaInicio,
+            horaFin: horaFin,
+            valor: valorPorTurno,
+            lugar: lugar,
+            tipo: tipo,
+            paymentType: 'nomina',
+            notas: `Turno de nómina - Salario mensual: $${salario.toFixed(2)}`,
+            creador: currentUser?.username || 'unknown',
+            isExchange: false
+          });
+        }
+      }
+
+      const storageKey = 'turnos_' + (currentUser?.username || 'local');
+      const turnosExistentes = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      
+      const turnosExistentesFiltrados = turnosExistentes.filter(t => {
+        const fechaTurno = new Date(t.fecha);
+        return !(fechaTurno.getMonth() === mesActual && 
+                 fechaTurno.getFullYear() === anioActual && 
+                 t.paymentType === 'nomina');
+      });
+
+      const nuevosTurnos = [...turnosExistentesFiltrados, ...turnosACrear];
+      localStorage.setItem(storageKey, JSON.stringify(nuevosTurnos));
+
+      cargarTurnos();
+      mostrarVistaCalendario();
+      alert(`✓ Se han generado ${turnosACrear.length} turnos de nómina para el mes actual.\n\nCálculo:\nSalario mensual: $${salario.toFixed(2)}\nTurnos generados: ${turnosACrear.length}\nValor por turno: $${valorPorTurno.toFixed(2)}\nTotal: $${(valorPorTurno * turnosACrear.length).toFixed(2)}`);
+    }
+
+    function limpiarConfigNomina() {
+      document.getElementById('nominaSalarioFijo').value = '';
+      document.getElementById('nominaLugar').value = '';
+      document.getElementById('nominaHoraInicio').value = '08:00';
+      document.getElementById('nominaHoraFin').value = '17:00';
+      document.getElementById('nominaTipo').value = 'consulta';
+      
+      for (let i = 0; i <= 6; i++) {
+        document.getElementById(`nominaDia${i}`).checked = false;
+      }
+    }
+
+    function generarSecuenciaOPS() {
+      const fechaInicio = document.getElementById('opsSecFechaInicio').value;
+      const cantidad = parseInt(document.getElementById('opsSecCantidad').value);
+      const frecuencia = parseInt(document.getElementById('opsSecFrecuencia').value);
+      const horaInicio = document.getElementById('opsSecHoraInicio').value;
+      const horaFin = document.getElementById('opsSecHoraFin').value;
+      const valor = parseFloat(document.getElementById('opsSecValor').value) || 0;
+      const lugar = document.getElementById('opsSecLugar').value.trim();
+      const tipo = document.getElementById('opsSecTipo').value;
+
+      if (!fechaInicio) {
+        alert('Por favor selecciona una fecha de inicio');
+        return;
+      }
+
+      if (!cantidad || cantidad < 1 || cantidad > 31) {
+        alert('Por favor ingresa un número válido de turnos (entre 1 y 31)');
+        return;
+      }
+
+      if (!lugar) {
+        alert('Por favor ingresa el lugar');
+        return;
+      }
+
+      const turnosACrear = [];
+      const fechaBase = new Date(fechaInicio + 'T00:00:00');
+
+      for (let i = 0; i < cantidad; i++) {
+        const fecha = new Date(fechaBase);
+        fecha.setDate(fechaBase.getDate() + (i * frecuencia));
+        
+        const anio = fecha.getFullYear();
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        const fechaStr = `${anio}-${mes}-${dia}`;
+
+        turnosACrear.push({
+          id: Date.now() + Math.random(),
+          fecha: fechaStr,
+          horaInicio: horaInicio,
+          horaFin: horaFin,
+          valor: valor,
+          lugar: lugar,
+          tipo: tipo,
+          paymentType: 'ops',
+          notas: `Turno OPS (secuencia ${i + 1}/${cantidad})`,
+          creador: currentUser?.username || 'unknown',
+          isExchange: false
+        });
+      }
+
+      const storageKey = 'turnos_' + (currentUser?.username || 'local');
+      const turnosExistentes = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const nuevosTurnos = [...turnosExistentes, ...turnosACrear];
+      localStorage.setItem(storageKey, JSON.stringify(nuevosTurnos));
+
+      cargarTurnos();
+      mostrarVistaCalendario();
+      alert(`✓ Se han generado ${cantidad} turnos OPS en secuencia.\nValor total: $${(valor * cantidad).toFixed(2)}`);
+    }
+
+    function limpiarSecuenciaOPS() {
+      document.getElementById('opsSecFechaInicio').value = '';
+      document.getElementById('opsSecCantidad').value = '4';
+      document.getElementById('opsSecFrecuencia').value = '3';
+      document.getElementById('opsSecHoraInicio').value = '07:00';
+      document.getElementById('opsSecHoraFin').value = '19:00';
+      document.getElementById('opsSecValor').value = '';
+      document.getElementById('opsSecLugar').value = '';
+      document.getElementById('opsSecTipo').value = 'guardia';
+    }
+
+    function buscarIA() {
+      const query = document.getElementById('iaQuery').value.trim();
+      
+      if (!query) {
+        alert('Por favor, ingresa una pregunta o búsqueda');
+        return;
+      }
+
+      document.getElementById('iaResultContent').innerHTML = `
+        <p>Para obtener información médica basada en evidencia sobre "${query}", por favor visita:</p>
+        <ul style="margin-top: 12px;">
+          <li style="margin: 8px 0;">
+            <a href="https://www.openevidence.com/" target="_blank" style="color: var(--primary); font-weight: 600;">
+              Open Evidence - IA médica especializada
+            </a>
+          </li>
+          <li style="margin: 8px 0;">
+            <a href="https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(query)}" target="_blank" style="color: var(--primary); font-weight: 600;">
+              PubMed - Búsqueda: "${query}"
+            </a>
+          </li>
+          <li style="margin: 8px 0;">
+            <a href="https://www.uptodate.com/contents/search?search=${encodeURIComponent(query)}" target="_blank" style="color: var(--primary); font-weight: 600;">
+              UpToDate - Búsqueda: "${query}"
+            </a>
+          </li>
+        </ul>
+        <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">
+          <strong>Nota:</strong> Estas son plataformas confiables para información médica. Open Evidence utiliza IA para resumir evidencia científica de manera precisa.
+        </p>
+      `;
+      
+      document.getElementById('iaResult').style.display = 'block';
+    }
+
+    function limpiarIA() {
+      document.getElementById('iaQuery').value = '';
+      document.getElementById('iaResult').style.display = 'none';
+    }
+
+    let medicamentosInteraction = [];
+
+    function agregarMedicamentoInteraction() {
+      const input = document.getElementById('drugInputInteraction');
+      const medicamento = input.value.trim();
+      
+      if (!medicamento) {
+        alert('Por favor, ingresa el nombre de un medicamento');
+        return;
+      }
+      
+      if (medicamentosInteraction.includes(medicamento.toLowerCase())) {
+        alert('Este medicamento ya está en la lista');
+        return;
+      }
+      
+      medicamentosInteraction.push(medicamento.toLowerCase());
+      input.value = '';
+      actualizarListaMedicamentosInteraction();
+    }
+
+    function actualizarListaMedicamentosInteraction() {
+      const container = document.getElementById('medicamentosListaInteraction');
+      
+      if (medicamentosInteraction.length === 0) {
+        container.innerHTML = '<p style="color: var(--muted); font-size: 14px; text-align: center; padding: 20px;">No hay medicamentos agregados. Agrega al menos 2 medicamentos para verificar interacciones.</p>';
+        return;
+      }
+      
+      container.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;">
+          ${medicamentosInteraction.map((med, index) => `
+            <div style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--g1), var(--g2)); color: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div style="flex: 1; font-weight: 600; font-size: 14px; text-transform: capitalize;">💊 ${med}</div>
+              <button onclick="eliminarMedicamentoInteraction(${index})" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">✕</button>
+            </div>
+          `).join('')}
+        </div>
+        <p style="margin-top: 12px; font-size: 13px; color: var(--muted);">
+          <strong>${medicamentosInteraction.length}</strong> medicamento${medicamentosInteraction.length !== 1 ? 's' : ''} agregado${medicamentosInteraction.length !== 1 ? 's' : ''}
+        </p>
+      `;
+    }
+
+    function eliminarMedicamentoInteraction(index) {
+      medicamentosInteraction.splice(index, 1);
+      actualizarListaMedicamentosInteraction();
+    }
+
+    function verificarInteracciones() {
+      if (medicamentosInteraction.length < 2) {
+        alert('Agrega al menos 2 medicamentos para verificar interacciones');
+        return;
+      }
+      
+      let html = `
+        <div style="background: rgba(99,102,241,0.1); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+          <p style="margin: 0; font-size: 14px; line-height: 1.6;">
+            <strong>📝 Análisis de ${medicamentosInteraction.length} medicamentos:</strong><br>
+            ${medicamentosInteraction.map(m => '<span style="background: rgba(0,139,139,0.15); padding: 2px 8px; border-radius: 4px; margin: 2px; display: inline-block; text-transform: capitalize;">' + m + '</span>').join('')}
+          </p>
+        </div>
+        
+        <div style="background: rgba(16,185,129,0.1); border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; margin-bottom: 16px;">
+          <p style="margin: 0 0 8px 0; font-weight: 600; color: #10b981;">✓ Verificación Básica Completada</p>
+          <p style="margin: 0; font-size: 14px;">
+            Se ha generado una lista de los medicamentos para verificar. Para un análisis detallado de interacciones, recomendamos consultar las bases de datos especializadas listadas abajo.
+          </p>
+        </div>
+        
+        <div style="background: rgba(251,191,36,0.1); border-left: 4px solid #fbbf24; padding: 16px; border-radius: 6px; margin-bottom: 16px;">
+          <p style="margin: 0 0 8px 0; font-weight: 600; color: #d97706;">⚠️ Recomendaciones Importantes</p>
+          <ul style="margin: 8px 0 0 20px; padding: 0; font-size: 14px; line-height: 1.8;">
+            <li>Verifica las interacciones en bases de datos actualizadas</li>
+            <li>Considera las características del paciente (edad, peso, comorbilidades)</li>
+            <li>Revisa dosis, vías de administración y tiempos</li>
+            <li>Consulta con farmacia clínica cuando sea necesario</li>
+          </ul>
+        </div>
+        
+        <div style="margin-top: 16px;">
+          <h5 style="margin: 0 0 12px 0; font-size: 14px; color: var(--primary);">🔗 Verifica en bases de datos especializadas:</h5>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="https://www.drugs.com/drug_interactions.php" target="_blank" class="btn secondary" style="text-decoration: none; text-align: center;">Drugs.com Interaction Checker</a>
+            <a href="https://reference.medscape.com/drug-interactionchecker" target="_blank" class="btn secondary" style="text-decoration: none; text-align: center;">Medscape Drug Interaction Checker</a>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('interaccionesResultContent').innerHTML = html;
+      document.getElementById('interaccionesResult').style.display = 'block';
+    }
+
+    function limpiarInteracciones() {
+      medicamentosInteraction = [];
+      document.getElementById('drugInputInteraction').value = '';
+      actualizarListaMedicamentosInteraction();
+      document.getElementById('interaccionesResult').style.display = 'none';
+    }
+
+    document.getElementById('drugInputInteraction')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        agregarMedicamentoInteraction();
+      }
+    });
+  </script>
+</body></html>

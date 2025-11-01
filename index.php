@@ -1,0 +1,41 @@
+<!doctype html><html lang="es" data-theme="light"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#008B8B">
+<title>Ingresar — Med Tools Hub</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  document.documentElement.classList.add('preload');
+  window.addEventListener('DOMContentLoaded', function(){
+    document.body.classList.add('loaded');
+    document.documentElement.classList.remove('preload');
+  });
+</script>
+</head><body>
+  <div class="auth-wrapper">
+    <div class="auth-box glass">
+      <h2 class="auth-title">Med Tools Hub</h2>
+      <form id="loginForm" class="stack" autocomplete="off">
+        <div class="field"><label for="loginUser">Usuario</label><input id="loginUser" type="text" required></div>
+        <div class="field"><label for="loginPass">Contraseña</label><input id="loginPass" type="password" required></div>
+        <div class="auth-actions">
+          <button class="btn grow" type="submit">Ingresar</button>
+          <a class="btn secondary" href="register.php">Registrarme</a>
+        </div>
+        <div style="text-align:center;margin-top:12px;">
+          <a href="reset-password.php" style="color:var(--text-muted);font-size:14px;text-decoration:none;">¿Olvidaste tu contraseña?</a>
+        </div>
+      </form>
+    </div>
+    <footer class="app-footer">
+      <h4>Aviso Legal</h4>
+      <p>Las herramientas de Med Tools Hub son de apoyo clínico y no sustituyen el criterio profesional. El uso y aplicación de los resultados son responsabilidad exclusiva de cada profesional de la salud.</p>
+      <p class="trademark">NBR® 2025 | Med Tools Hub</p>
+      <p class="contact">administrador@medtoolshub.com</p>
+    </footer>
+  </div>
+  <script src="script.js"></script>
+</body></html>
